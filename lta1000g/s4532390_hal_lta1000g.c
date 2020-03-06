@@ -69,7 +69,7 @@ void lta1000g_seg_set(int segment, unsigned char segment_value) {
 
 void s4532390_hal_lta1000g_write(unsigned short value) {
     for (int i = 0; i < NUM_PINS; i++) {
-        lta1000g_seg_set(i, 0x01 & (value >> i));
+        lta1000g_seg_set(i, (value & ( 1 << i )) >> i);
         debug_printf("Value: %d\n\r", 0x01 & (value >> i));	
     }
 }
