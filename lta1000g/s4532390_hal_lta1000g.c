@@ -1,4 +1,5 @@
-#include "s4532390_hal_lta1000g.h"
+#include "board.h"
+#include "processor_hal.h"
 
 #define NUM_PINS 10
 
@@ -32,8 +33,6 @@ void s4532390_hal_lta1000g_init() {
 
     GPIO_InitTypeDef  GPIO_InitStructure;
     
-    
-    
 
     for (int i = 0; i < NUM_PINS; ++i) {
         GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;		//Output Mode
@@ -48,6 +47,7 @@ void s4532390_hal_lta1000g_init() {
 
 void lta1000g_seg_set(int segment, unsigned char segment_value) {
     HAL_GPIO_WritePin(IOPorts[segment], IOPins[segment], 1 & segment);
+    //IOPorts[segment] ^= IOPins[segment];
 }
 
 void s4532390_hal_lta1000g_write(unsigned short value) {
