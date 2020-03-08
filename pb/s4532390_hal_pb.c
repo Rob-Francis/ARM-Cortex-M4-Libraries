@@ -1,15 +1,18 @@
  /** 
  **************************************************************
- * @file mylib/s4532390_hal_pb.c
+ * @file mylib/pb/s4532390_hal_pb.c
  * @author Robert Francis - 45323906
  * @date 8/03/20
  * @brief Hal Pushbutton Driver
  ***************************************************************
  * EXTERNAL FUNCTIONS 
  ***************************************************************
- * s4532390_hal_lta1000g_init() - initialises the lightbar
- * lta1000g_seg_set(int segment, unsigned char segment_value) - sets a single segment of the bar
- * s4532390_hal_lta1000g_write(unsigned short value) - sets the entire lightbar according to value
+ * s4532390_hal_pb_on_init() - initialises the onboard button
+ * s4532390_hal_pb_on_isr() - interrupt routine for the button
+ * s4532390_hal_pb_on_deinit() - deinitialiser for the button
+ * s4532390_hal_pb_iss_init() - initialises the iss
+ * s4532390_hal_pb_iss_isr() - iss interrupt routine (moves the light)
+ * s4532390_hal_pb_iss_deinit() - deinitialiser for the iss
  *************************************************************** 
  */
 
@@ -43,7 +46,7 @@ void s4532390_hal_pb_on_init() {
 }
 
 void s4532390_hal_pb_on_isr() {
-    BRD_LEDToggle(BRD_GREEN_LEDMASK|BRD_BLUE_LEDMASK|BRD_RED_LEDMASK);
+	
     direction = ~direction;
 }
 
