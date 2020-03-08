@@ -1,9 +1,25 @@
+ /** 
+ **************************************************************
+ * @file mylib/s4532390_hal_lta1000g.c
+ * @author Robert Francis - 45323906
+ * @date 8/03/20
+ * @brief Hal Lightbar Driver
+ ***************************************************************
+ * EXTERNAL FUNCTIONS 
+ ***************************************************************
+ * s4532390_hal_lta1000g_init() - initialises the lightbar
+ * lta1000g_seg_set(int segment, unsigned char segment_value) - sets a single segment of the bar
+ * s4532390_hal_lta1000g_write(unsigned short value) - sets the entire lightbar according to value
+ *************************************************************** 
+ */
+
+
 #include "board.h"
 #include "processor_hal.h"
 
 #define NUM_PINS 10
 
-uint8_t IOPins[] = {
+uint16_t IOPins[] = {
         BRD_D16_PIN,
         BRD_D17_PIN,
         BRD_D18_PIN,
@@ -70,6 +86,5 @@ void lta1000g_seg_set(int segment, unsigned char segment_value) {
 void s4532390_hal_lta1000g_write(unsigned short value) {
     for (int i = 0; i < NUM_PINS; ++i) {
         lta1000g_seg_set(i, 0x01 & (value >> i));
-        debug_printf("Value: %d\n\r", 0x01 & (value >> i));	
     }
 }

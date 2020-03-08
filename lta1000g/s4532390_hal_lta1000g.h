@@ -1,8 +1,6 @@
 #ifndef HAL_LTA1000G_H
 #define HAL_LTA1000G_H
 
-#include "board.h"
-#include "processor_hal.h"
 
 void s4532390_hal_lta1000g_init();
 
