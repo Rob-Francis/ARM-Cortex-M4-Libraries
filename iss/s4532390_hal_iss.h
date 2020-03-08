@@ -21,6 +21,7 @@
 #ifndef HAL_ISS
 #define HAL_ISS
 
+//Used for referring to different interrupt sources
 #define S4532390_HAL_ISS_SOURCE1 0
 #define S4532390_HAL_ISS_SOURCE2 1
 #define S4532390_HAL_ISS_SOURCE3 2

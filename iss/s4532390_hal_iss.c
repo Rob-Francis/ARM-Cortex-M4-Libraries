@@ -40,7 +40,6 @@ void s4532390_hal_iss_synchroniser(unsigned char signal_source_index) {
 
     
     if ((time - s4532390_hal_iss_lasttimer_read(signal_source_index)) >= iss_delay_val[signal_source_index]) {
-        debug_printf("Times : %d  %d \r\n", s4532390_hal_iss_lasttimer_read(signal_source_index), time);
         if (++iss_eventcounter_val[signal_source_index] == 10) {
             s4532390_hal_iss_eventcounter_reset(signal_source_index);
         }

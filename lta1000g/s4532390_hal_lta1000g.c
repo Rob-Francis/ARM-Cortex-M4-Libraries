@@ -17,8 +17,11 @@
 #include "board.h"
 #include "processor_hal.h"
 
-#define NUM_PINS 10
+//COMPILER DEFINITIONS
+#define NUM_PINS 10 //Numbers of pins used by lightbar
 
+//GLOBAL VARIABLES
+//Array of pins
 uint16_t IOPins[] = {
         BRD_D16_PIN,
         BRD_D17_PIN,
@@ -32,6 +35,7 @@ uint16_t IOPins[] = {
         BRD_D25_PIN
     };
 
+//Array of ports
 GPIO_TypeDef* IOPorts[] = {
         BRD_D16_GPIO_PORT,
         BRD_D17_GPIO_PORT,
@@ -45,10 +49,12 @@ GPIO_TypeDef* IOPorts[] = {
         BRD_D25_GPIO_PORT
     };
 
+//Initialiser for lighbar - sets all pins to output
 void s4532390_hal_lta1000g_init() {
 
     GPIO_InitTypeDef  GPIO_InitStructure;
     
+    //Sets clocks for pins
     __BRD_D16_GPIO_CLK();
     __BRD_D17_GPIO_CLK();
     __BRD_D18_GPIO_CLK();
@@ -59,7 +65,6 @@ void s4532390_hal_lta1000g_init() {
     __BRD_D23_GPIO_CLK();
     __BRD_D24_GPIO_CLK();
     __BRD_D25_GPIO_CLK();
-
     
 
     for (int i = 0; i < NUM_PINS; ++i) {
@@ -70,21 +75,17 @@ void s4532390_hal_lta1000g_init() {
         HAL_GPIO_Init(IOPorts[i], &GPIO_InitStructure);	//Initialise Pin
     }
 
-    // GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;		//Output Mode
-  	//     GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable Pull up, down or no pull resister
-  	//     GPIO_InitStructure.Speed = GPIO_SPEED_FAST;			//Pin latency
-    //     GPIO_InitStructure.Pin = IOPins[0];				//Pin
-    //     HAL_GPIO_Init(IOPorts[0], &GPIO_InitStructure);	//Initialise Pin
-  	
-
 };
 
+//Sets the lightbar for a single segment
 void lta1000g_seg_set(int segment, unsigned char segment_value) {
-    HAL_GPIO_WritePin(IOPorts[segment], IOPins[segment], segment_value & 0x01);
+    HAL_GPIO_WritePin(IOPorts[segment], IOPins[segment], segment_value & 0x01); //Writes 1 bit in
 }
 
+//Sets lighbar for the whole 10 segments
 void s4532390_hal_lta1000g_write(unsigned short value) {
+    //Loops through 10 times
     for (int i = 0; i < NUM_PINS; ++i) {
-        lta1000g_seg_set(i, 0x01 & (value >> i));
+        lta1000g_seg_set(i, 0x01 & (value >> i)); //Shifts bits over for each pin
     }
 }
