@@ -52,12 +52,14 @@ void s4532390_hal_pb_on_init() {
 
 //Interrupt for pushbutton just reverses direction
 void s4532390_hal_pb_on_isr() {
+
 	debug_printf("Button interrupt\r\n");
     direction = ~direction;
 }
 
 //Deinitialiser disables onboard button
 void s4532390_hal_pb_on_deinit() {
+
 	BRD_USER_BUTTON_GPIO_CLK_DISABLE();
 	HAL_GPIO_DeInit(BRD_USER_BUTTON_GPIO_PORT, BRD_USER_BUTTON_PIN);
 }
@@ -89,26 +91,32 @@ void s4532390_hal_pb_iss_isr() {
 
 	//Checks for the edges/intermediate case
 	if ((lightBarValue >= LTA1000G_START && direction) || (lightBarValue <= LTA1000G_END && !direction)) {
+
           lightBarValue = LTA1000G_INTERMEDIATE;
       } else if (lightBarValue == LTA1000G_INTERMEDIATE) {
 
 		  //Ensures correct direction after the intermediate case
           if (direction) {
+
             lightBarValue = LTA1000G_END;
            } else {
+
 			lightBarValue = LTA1000G_START;
            }
           
 	  //Bit shifts for normal movement
       } else if (direction) {
+
           lightBarValue = lightBarValue << 1;
       } else {
+
           lightBarValue = lightBarValue >> 1;
       }
 }
 
 //ISS deninitialiser stops reading the AOPin
 void s4532390_hal_pb_iss_deinit() {
+	
 	HAL_GPIO_DeInit(BRD_A0_GPIO_PORT, BRD_A0_PIN);
 }
 

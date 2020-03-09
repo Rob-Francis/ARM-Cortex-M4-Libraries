@@ -1,6 +1,6 @@
  /** 
  **************************************************************
- * @file mylib/iss/s4532390_hal_iss.c
+ * @file mylib/iss/s4532390_hal_iss.h
  * @author Robert Francis - 45323906
  * @date 8/03/20
  * @brief Hal Input Signal Sychroniser Driver Header file

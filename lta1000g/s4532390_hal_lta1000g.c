@@ -68,6 +68,7 @@ void s4532390_hal_lta1000g_init() {
     
 
     for (int i = 0; i < NUM_PINS; ++i) {
+
         GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;		//Output Mode
   	    GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable Pull up, down or no pull resister
   	    GPIO_InitStructure.Speed = GPIO_SPEED_FAST;			//Pin latency
@@ -79,11 +80,13 @@ void s4532390_hal_lta1000g_init() {
 
 //Sets the lightbar for a single segment
 void lta1000g_seg_set(int segment, unsigned char segment_value) {
+
     HAL_GPIO_WritePin(IOPorts[segment], IOPins[segment], segment_value & 0x01); //Writes 1 bit in
 }
 
 //Sets lighbar for the whole 10 segments
 void s4532390_hal_lta1000g_write(unsigned short value) {
+    
     //Loops through 10 times
     for (int i = 0; i < NUM_PINS; ++i) {
         lta1000g_seg_set(i, 0x01 & (value >> i)); //Shifts bits over for each pin
