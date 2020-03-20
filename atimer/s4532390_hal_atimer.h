@@ -1,11 +1,15 @@
 #ifndef HAL_ATIMER
 #define HAL_ATIMER
 
-#include "board.h"
+// #include "board.h"
 
-extern TIM_HandleTypeDef TIM_Init;
+// extern TIM_HandleTypeDef TIM_Init;
 
-#define s4532390_hal_atimer_timer_read()
+extern int atimerCounterValue;
+extern int atimerPeriod;
+extern int atimerClkSpeedVal;
+
+#define s4532390_hal_atimer_timer_read() atimerCounterValue
 
 void s4532390_hal_atimer_init();
 
@@ -19,7 +23,7 @@ void s4532390_hal_atimer_timer_resume();
 
 void s4532390_hal_atimer_clkspeed_set(int frequency);
 
-void s4532390_hal_atimer_period(int period);
+void s4532390_hal_atimer_period_set(int period);
 
 void s4532390_hal_atimer_init_pin();
 
