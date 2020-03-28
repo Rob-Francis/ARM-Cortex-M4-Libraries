@@ -1,0 +1,61 @@
+#include "board.h"
+#include "processor_hal.h"
+#include "s4532390_hal_pwm.h"
+
+/*
+#define PWM_CLOCKFREQ		50000
+#define PWM_PULSEPERIOD		(PWM_CLOCKFREQ/100)
+#define PWM_PERIOD			2*PWM_CLOCKFREQ/10
+#define PWM_CHANNEL			TIM_CHANNEL_1
+#define PWM_PIN				BRD_D6_PIN
+#define PWM_TIMER			TIM1
+#define PWM_GPIO_AF			GPIO_AF1_TIM1
+#define PWM_PIN_CLK()		__TIM1_CLK_ENABLE()
+#define PWM_TIMER_HANDLER	TIM_Init
+#define PWM_DC_GET() 		__HAL_TIM_GET_COMPARE(&PWM_TIMER_HANDLER, PWM_CHANNEL)
+#define PWM_DC_SET(value) 	__HAL_TIM_SET_COMPARE(&PWM_TIMER_HANDLER, PWM_CHANNEL, value)
+*/
+
+TIM_HandleTypeDef PWMTIM_Init;
+
+void s4532390_hal_pwm_init() {
+
+    
+    GPIO_InitTypeDef GPIO_InitStructure;
+	TIM_OC_InitTypeDef PWMConfig;
+
+	uint16_t PrescalerValue = 0;
+
+	S4532390_HAL_PWM_TIMER_CLK();
+	S4532390_HAL_PWM_PINCLK();
+
+	GPIO_InitStructure.Pin = S4532390_HAL_PWM_PIN;
+	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStructure.Pull = GPIO_NOPULL;
+	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	GPIO_InitStructure.Alternate = S4532390_HAL_PWM_GPIOAF;
+	HAL_GPIO_Init(S4532390_HAL_PWM_PINGPIOPORT, &GPIO_InitStructure);
+
+	PrescalerValue = (uint16_t) ((SystemCoreClock /2) / S4532390_HAL_PWM_CLOCKFREQ) - 1;
+
+	S4532390_HAL_PWM_HANDLER.Instance = S4532390_HAL_PWM_TIMER;
+	S4532390_HAL_PWM_HANDLER.Init.Period = S4532390_HAL_PWM_PERIOD;
+	S4532390_HAL_PWM_HANDLER.Init.Prescaler = PrescalerValue;
+	S4532390_HAL_PWM_HANDLER.Init.ClockDivision = 0;
+	S4532390_HAL_PWM_HANDLER.Init.RepetitionCounter = 0;
+	S4532390_HAL_PWM_HANDLER.Init.CounterMode = TIM_COUNTERMODE_UP;
+
+	PWMConfig.OCMode = TIM_OCMODE_PWM1;
+	PWMConfig.Pulse = S4532390_HAL_PWM_PULSEPERIOD;
+	PWMConfig.OCPolarity = TIM_OCPOLARITY_HIGH;
+	PWMConfig.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	PWMConfig.OCFastMode = TIM_OCFAST_DISABLE;
+	PWMConfig.OCIdleState = TIM_OCIDLESTATE_RESET;
+	PWMConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+
+	HAL_TIM_PWM_Init(&S4532390_HAL_PWM_HANDLER);
+	HAL_TIM_PWM_ConfigChannel(&S4532390_HAL_PWM_HANDLER, &PWMConfig, S4532390_HAL_PWM_CHANNEL);
+
+	HAL_TIM_PWM_Start(&S4532390_HAL_PWM_HANDLER, S4532390_HAL_PWM_CHANNEL);
+
+}

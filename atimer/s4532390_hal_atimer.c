@@ -19,7 +19,7 @@ void s4532390_hal_atimer_init() {
 
 
 	BRD_LEDInit(); // Initialise LEDS 
-	BRD_init();
+	
 	
 	BRD_LEDRedOff();
 	BRD_LEDGreenOff();
@@ -74,7 +74,6 @@ void s4532390_hal_atimer_clkspeed_set(int frequency) {
 
 	if (frequency > 0) {
 		atimerClkSpeedVal = frequency;	
-		debug_printf("Speed changed to %d: \r\n", frequency);
 	}
 
 	// s4532390_hal_atimer_timer_pause();
