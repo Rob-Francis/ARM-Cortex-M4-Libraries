@@ -53,7 +53,6 @@ void s4532390_hal_pb_on_init() {
 //Interrupt for pushbutton just reverses direction
 void s4532390_hal_pb_on_isr() {
 
-	debug_printf("Button interrupt\r\n");
     direction = ~direction;
 }
 
@@ -120,3 +119,7 @@ void s4532390_hal_pb_iss_deinit() {
 	HAL_GPIO_DeInit(BRD_A0_GPIO_PORT, BRD_A0_PIN);
 }
 
+// void EXTI3_IRQHandler(void) {
+
+//   HAL_GPIO_EXTI_IRQHandler(BRD_A0_PIN);
+// }

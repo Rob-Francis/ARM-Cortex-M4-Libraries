@@ -1,6 +1,7 @@
 #include "s4532390_hal_joystick.h"
 
 ADC_HandleTypeDef handleX, handleY;
+int joystickZ = 0;
 
 void s4532390_hal_joystick_init() {
 
@@ -80,7 +81,21 @@ void s4532390_hal_joystick_init() {
 	HAL_ADC_ConfigChannel(&handleY, &AdcChanConfigY);		//Initialise ADC channel
 
 
+	GPIO_InitTypeDef GPIO_InitStructureZ;
+
+	__BRD_A3_GPIO_CLK();
+
+	GPIO_InitStructureZ.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStructureZ.Pull = GPIO_PULLUP;
+	GPIO_InitStructureZ.Pin  = BRD_A3_PIN;
+	HAL_GPIO_Init(BRD_A3_GPIO_PORT, &GPIO_InitStructureZ);
+
+	//Sets priority to 10
+	HAL_NVIC_SetPriority(BRD_A3_EXTI_IRQ, 10, 0);
+	HAL_NVIC_EnableIRQ(BRD_A3_EXTI_IRQ);
 }
+
+
 
 int joystick_readxy(ADC_HandleTypeDef Handler) {
 
@@ -93,3 +108,5 @@ int joystick_readxy(ADC_HandleTypeDef Handler) {
 
 	return adc_value;
 }
+
+
