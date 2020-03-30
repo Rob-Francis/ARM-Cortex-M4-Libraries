@@ -7,8 +7,7 @@ void s4532390_hal_pwm_init();
 #include "s4532390_hal_mylib_configure.h"
 #endif
 
-
-
+//Default values for PWM if they are not specified
 #ifndef S4532390_HAL_PWM_CLOCKFREQ
 #define S4532390_HAL_PWM_CLOCKFREQ 100
 #endif

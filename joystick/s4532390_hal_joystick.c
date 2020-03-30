@@ -1,8 +1,15 @@
 #include "s4532390_hal_joystick.h"
 
+//GLOBAL VARIABLES
+//
 ADC_HandleTypeDef handleX, handleY;
 int joystickZ = 0;
 
+/**
+*@brief Initialiser for joystick
+*@param None
+*@retval None
+*/
 void s4532390_hal_joystick_init() {
 
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -20,11 +27,22 @@ void s4532390_hal_joystick_init() {
     GPIO_InitStructure.Pin = BRD_A2_PIN;
     HAL_GPIO_Init(BRD_A2_GPIO_PORT, &GPIO_InitStructure);
 
-	// //Set pin A3 for Z
-    // __BRD_A3_GPIO_CLK();
-    // GPIO_InitStructure.Pin = BRD_A3_PIN;
-    // HAL_GPIO_Init(BRD_A3_GPIO_PORT, &GPIO_InitStructure);
+	// //Set pin A3 for Z - as interrupt
+	GPIO_InitTypeDef GPIO_InitStructureZ;
 
+	__BRD_A3_GPIO_CLK();
+
+	GPIO_InitStructureZ.Mode = GPIO_MODE_IT_RISING;
+	GPIO_InitStructureZ.Pull = GPIO_PULLUP;
+	GPIO_InitStructureZ.Pin  = BRD_A3_PIN;
+	HAL_GPIO_Init(BRD_A3_GPIO_PORT, &GPIO_InitStructureZ);
+
+	//Sets priority to 10
+	HAL_NVIC_SetPriority(BRD_A3_EXTI_IRQ, 10, 0);
+	HAL_NVIC_EnableIRQ(BRD_A3_EXTI_IRQ);
+
+
+	//Sets and initialises ADC and ADC channel for X 
 	__ADC1_CLK_ENABLE();
 
 	handleX.Instance = (ADC_TypeDef *)(ADC1_BASE);						//Use ADC1
@@ -52,7 +70,7 @@ void s4532390_hal_joystick_init() {
 
 	HAL_ADC_ConfigChannel(&handleX, &AdcChanConfigX);		//Initialise ADC channel
 
-
+	//Sets and initialises ADC and ADC channel for Y
 	__ADC2_CLK_ENABLE();
 
 	handleY.Instance = (ADC_TypeDef *)(ADC2_BASE);						//Use ADC1
@@ -79,24 +97,14 @@ void s4532390_hal_joystick_init() {
 	AdcChanConfigY.Offset       = 0;
 
 	HAL_ADC_ConfigChannel(&handleY, &AdcChanConfigY);		//Initialise ADC channel
-
-
-	GPIO_InitTypeDef GPIO_InitStructureZ;
-
-	__BRD_A3_GPIO_CLK();
-
-	GPIO_InitStructureZ.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStructureZ.Pull = GPIO_PULLUP;
-	GPIO_InitStructureZ.Pin  = BRD_A3_PIN;
-	HAL_GPIO_Init(BRD_A3_GPIO_PORT, &GPIO_InitStructureZ);
-
-	//Sets priority to 10
-	HAL_NVIC_SetPriority(BRD_A3_EXTI_IRQ, 10, 0);
-	HAL_NVIC_EnableIRQ(BRD_A3_EXTI_IRQ);
+	
 }
 
-
-
+/**
+*@brief Reads x or y value for joystick
+*@param Handler - the handle of adc (either handleX or handleY)
+*@retval adc_value (int) - value of joystick (0 - 4000 depending on deflection)
+*/
 int joystick_readxy(ADC_HandleTypeDef Handler) {
 
 	HAL_ADC_Start(&Handler); // Start ADC conversion

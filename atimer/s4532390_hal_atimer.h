@@ -1,10 +1,7 @@
 #ifndef HAL_ATIMER
 #define HAL_ATIMER
 
-// #include "board.h"
-
-// extern TIM_HandleTypeDef TIM_Init;
-
+//Global variables used in main
 extern int atimerCounterValue;
 extern int atimerPeriod;
 extern int atimerClkSpeedVal;
@@ -29,7 +26,7 @@ void s4532390_hal_atimer_init_pin();
 
 void atimer_isr_callback();
 
-
+//DEFAULT VALUES
 #ifdef S4532390_MYLIB_CONFIGURE_INC
 #include "s4532390_hal_mylib_configure.h"
 #endif

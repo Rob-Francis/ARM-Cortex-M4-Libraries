@@ -1,8 +1,7 @@
-
-
 #ifndef HAL_JOYSTICK
 #define HAL_JOYSTICK
 
+//Macros for reading xyz joystick values
 #define S4532390_HAL_X_READ() joystick_readxy(handleX)
 #define S4532390_HAL_Y_READ() joystick_readxy(handleY)
 #define S4532390_HAL_Z_READ() joystickZ
@@ -10,6 +9,7 @@
 #include "board.h"
 #include "processor_hal.h"
 
+//Global variables used in main
 extern ADC_HandleTypeDef handleX, handleY;
 extern int joystickZ;
 
