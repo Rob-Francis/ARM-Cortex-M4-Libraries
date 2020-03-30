@@ -26,7 +26,7 @@ void s4532390_hal_pwm_init() {
 	GPIO_InitStructure.Pin = S4532390_HAL_PWM_PIN;
 	GPIO_InitStructure.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStructure.Pull = GPIO_NOPULL;
-	GPIO_InitStructure.Speed = GPIO_SPEED_FAST;
+	GPIO_InitStructure.Speed = S4532390_HAL_PWM_PINCLKSPEED;
 	GPIO_InitStructure.Alternate = S4532390_HAL_PWM_GPIOAF;
 	HAL_GPIO_Init(S4532390_HAL_PWM_PINGPIOPORT, &GPIO_InitStructure);
 
