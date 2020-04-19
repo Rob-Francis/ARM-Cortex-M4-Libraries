@@ -30,6 +30,12 @@ csse3010_mylib_hal_keypad.pdf
 #include "processor_hal.h"
 #include "s4532390_hal_keypad.h"
 
+
+/*********
+*DEFINTIONS
+**********/
+
+//State machine states
 #define INIT_STATE 0
 #define COL1_STATE 1
 #define COL2_STATE 2
@@ -38,126 +44,197 @@ csse3010_mylib_hal_keypad.pdf
 #define ROWSCAN_STATE 5
 #define DEINIT_STATE 6
 
+//Row states
 #define ROW_EMPTY_STATE 15
 #define ROW1_STATE 14
 #define ROW2_STATE 13
 #define ROW3_STATE 11
 #define ROW4_STATE 7
 
-
+//Set pins to true
 #define keypad_col1() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL1PINPORT, S4532390_HAL_KEYPAD_COL1PIN, 0x01)
 #define keypad_col2() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL2PINPORT, S4532390_HAL_KEYPAD_COL2PIN, 0x01)
 #define keypad_col3() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL3PINPORT, S4532390_HAL_KEYPAD_COL3PIN, 0x01)
 #define keypad_col4() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL4PINPORT, S4532390_HAL_KEYPAD_COL4PIN, 0x01)
 
+//Set pins false
 #define keypad_col1_off() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL1PINPORT, S4532390_HAL_KEYPAD_COL1PIN, 0x00)
 #define keypad_col2_off() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL2PINPORT, S4532390_HAL_KEYPAD_COL2PIN, 0x00)
 #define keypad_col3_off() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL3PINPORT, S4532390_HAL_KEYPAD_COL3PIN, 0x00)
 #define keypad_col4_off() HAL_GPIO_WritePin(S4532390_HAL_KEYPAD_COL4PINPORT, S4532390_HAL_KEYPAD_COL4PIN, 0x00)
 
+/*********
+*GLOBALS
+**********/
+
+//Stores current and previous keypad states
 int KeypadFsmCurrentstate, KeypadFsmLastState;
 
+//1 if key pressed, 0 otherwise
 int KeypadStatus;
+
+//Stores current keypad value
 unsigned char KeypadValue;
+
+//Toggle variable so 2 characters are printed per line
 unsigned char KeypadToggle;
 
 
+/**
+*@brief Set the state of the keypadFSM to INIT state
+*@param None
+*@retval None
+*/
 void s4532390_hal_keypad_init() {
     KeypadFsmCurrentstate = INIT_STATE;
     
 }
 
+
+/**
+*@brief Set the state of the keypadFSM to DEINIT state
+*@param None
+*@retval None
+*/
 void s4532390_hal_keypad_deinit() {
-    // Key
+    KeypadFsmCurrentstate = DEINIT_STATE;
 }
 
+
+/**
+*@brief Converts column and row to hexadecimal value of keypad
+*@param column and row - column of keypad and row of keypad
+*@retval hexadecimal value of key pressed
+*/
 int get_keypad_num(int column, int row) {
 
     switch (column) {
         case COL1_STATE:
+
             switch(row) {
                 case ROW1_STATE:
                     return 1;
+
                 case ROW2_STATE:
                     return 4;
+
                 case ROW3_STATE:
                     return 7;
+
                 case ROW4_STATE:
                     return 0;
             }
+
         case COL2_STATE:
+
             switch(row) {
                 case ROW1_STATE:
                     return 2;
+
                 case ROW2_STATE:
                     return 5;
+
                 case ROW3_STATE:
                     return 8;
+
                 case ROW4_STATE:
                     return 15;
             }
+
         case COL3_STATE:
+
             switch(row) {
                 case ROW1_STATE:
                     return 3;
+
                 case ROW2_STATE:
                     return 6;
+
                 case ROW3_STATE:
                     return 9;
+
                 case ROW4_STATE:
                     return 14;
             }
+
         case COL4_STATE:
+
             switch(row) {
                 case ROW1_STATE:
                     return 10;
+
                 case ROW2_STATE:
                     return 11;
+
                 case ROW3_STATE:
                     return 12;
+
                 case ROW4_STATE:
                     return 13;
             }
     }
 }
 
-void handleRowscan() {
 
+/**
+*@brief Scans then prints the keys pressed on the keypad
+*@param None
+*@retval None
+*/
+void handle_rowscan() {
+
+    //Scans row pins
     int tempRow = keypad_readrow();
 
+    //Leaves if nothing pressed
     if (tempRow == ROW_EMPTY_STATE) {
         return;
     }
 
+    //Converts into a hex value
     unsigned char temp = get_keypad_num(KeypadFsmLastState, tempRow);
     
+    //Prints characters 2 at a time
     if (KeypadToggle) {
-        debug_printf("%x%x\r\n", KeypadValue, temp);
+        debug_printf("%X%X\r\n", KeypadValue, temp);
         debug_flush();
         KeypadToggle = 0;
+
     } else {
         KeypadToggle = 1;
+
     }
     
+    //Stores the last value pressed
     KeypadValue = temp;
 }
 
+
+/**
+*@brief Keypad FSM processing loop
+*@param None
+*@retval None
+*/
 void s4532390_hal_keypad_fsmprocessing() {
 
-    
+    //Switch statement for the state machine
     switch(KeypadFsmCurrentstate) {
+
         case INIT_STATE:
             keypad_gpio_init();
             KeypadFsmLastState = INIT_STATE;
             KeypadFsmCurrentstate = COL1_STATE;
-            break;        
+            break;   
+
         case ROWSCAN_STATE:
-            handleRowscan();
+            handle_rowscan();
             KeypadFsmCurrentstate = (KeypadFsmLastState % 4) + 1;
             break;
+
         case DEINIT_STATE:
             s4532390_hal_keypad_deinit();
             break;
+
         default:
             keypad_writecol(KeypadFsmCurrentstate);
             KeypadFsmLastState = KeypadFsmCurrentstate;
@@ -166,9 +243,17 @@ void s4532390_hal_keypad_fsmprocessing() {
     }
 }
 
+
+/**
+*@brief Initalise all GPIO pins
+*@param None
+*@retval None
+*/
 void keypad_gpio_init() {
+
     GPIO_InitTypeDef  GPIO_InitStructure;
 
+    //Sets pins clocks
     S4532390_HAL_KEYPAD_COL1PINCLK();
     S4532390_HAL_KEYPAD_COL2PINCLK();
     S4532390_HAL_KEYPAD_COL3PINCLK();
@@ -179,12 +264,12 @@ void keypad_gpio_init() {
     S4532390_HAL_KEYPAD_ROW4PINCLK();
         
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;		//Output Mode
-    GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable Pull up, down or no pull resister
+    GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable pull down
     GPIO_InitStructure.Speed = GPIO_SPEED_FAST;			//Pin latency
 
-
-    GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL1PIN;			//Pin
-    HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL1PINPORT, &GPIO_InitStructure);	//Initialise Pin
+    //Sets output pins and initialises them
+    GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL1PIN;
+    HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL1PINPORT, &GPIO_InitStructure);
     GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL2PIN;
     HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL2PINPORT, &GPIO_InitStructure);
     GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL3PIN;
@@ -192,6 +277,7 @@ void keypad_gpio_init() {
     GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL4PIN;
     HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL4PINPORT, &GPIO_InitStructure);
 
+    //Sets input pins and initialises them
     GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
     GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_ROW1PIN;
     HAL_GPIO_Init(S4532390_HAL_KEYPAD_ROW1PINPORT, &GPIO_InitStructure);
@@ -204,6 +290,11 @@ void keypad_gpio_init() {
 }
 
 
+/**
+*@brief Reads data from row pins
+*@param None
+*@retval 4 bits - low for row that is on
+*/
 int keypad_readrow() {
 
     int out = ROW_EMPTY_STATE;
@@ -227,22 +318,35 @@ int keypad_readrow() {
     return out;
 }
 
+
+/**
+*@brief Turns a row pin on
+*@param colval - 1 for row 1, 2 for row 2, etc (done as it allows state variable to be used)
+*@retval None
+*/
 void keypad_writecol(int colval) {
+
+    //Turns columns off first
     keypad_col1_off();
     keypad_col2_off();
     keypad_col3_off();
     keypad_col4_off();
 
+    
     switch (colval) {
+        
         case COL1_STATE:
             keypad_col1();
             break;
+
         case COL2_STATE:
             keypad_col2();
             break;
+
         case COL3_STATE:
             keypad_col3();
             break;
+
         case COL4_STATE:
             keypad_col4();
             break;
@@ -251,14 +355,31 @@ void keypad_writecol(int colval) {
 }
 
 
+/**
+*@brief Return the KeypadStatus variable
+*@param None
+*@retval 1 if keypad on, 0 if off
+*/
 int s4532390_hal_keypad_read_status() {
     return KeypadStatus;
 }
 
+
+/**
+*@brief Return the current hexadecimal value of the keypad
+*@param None
+*@retval Hexadecimal from 0 - 15
+*/
 int s4532390_hal_keypad_read_key() {
     return KeypadValue;
 }
 
+
+/**
+*@brief Return the current ASCII value of the keypad
+*@param None
+*@retval Ascii from 0 - 9 and A - F
+*/
 char s4532390_hal_keypad_read_ascii() {
     return (KeypadValue <= 9) ? (KeypadValue + '0') : (KeypadValue + 'A' + 10);
 }

@@ -25,8 +25,8 @@ csse3010_mylib_hal_keypad.pdf
 *********************
 **/
 
-#ifndef KEYPAD_HEADER_H
-#define KEYPAD_HEADER_H
+#ifndef S4532390_HAL_KEYPAD_H
+#define S4532390_HAL_KEYPAD_H
 
 #include "s4532390_hal_mylib_configure.h"
 

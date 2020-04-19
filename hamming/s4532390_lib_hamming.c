@@ -80,21 +80,34 @@ uint8_t s4532390_lib_hamming_byte_decode(uint8_t in) {
     //Parity
     int parity = h0 ^ h1 ^ h2 ^ d0 ^ d1 ^ d2 ^ d3;
 
-
     //Error correction
     if (syndrome != 0) {
-        if (s4532390_lib_hamming_parity_error(in)) {
-            // debug_printf("2 bit error\r\n");
+        
+        if (!s4532390_lib_hamming_parity_error(in)) {
+            debug_printf("2 Bit Error\r\n");
+            debug_flush();
 
         } else if (s0 && !s1 && !s2) {
-            d0 = !d0;
+            h0 = !h0;
+
         } else if (!s0 && s1 && !s2) {
-            d1 = !d1;
+            h1 = !h1;
+
         } else if (!s0 && !s1 && s2) {
+            h2 = !h2;
+
+        } else if (!s0 && s1 && s2) {
+            d0 = !d0;
+
+        } else if (s0 && !s1 && s2) {
+            d1 = !d1;
+
+        } else if (s0 && s1 && !s2) {
             d2 = !d2;
-        } else if (!s0 && !s1 && !s2) {
+
+        } else if (s0 && s1 && s2) {
             d3 = !d3;
-        }      
+        }   
     }
     
     return  (d0 << 0) | (d1 << 1) | (d2 << 2) | (d3 << 3);

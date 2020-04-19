@@ -20,8 +20,8 @@ csse3010_mylib_lib_hamming.pdf
 *********************
 **/
 
-#ifndef HAMMING_HEADER_H
-#define HAMMING_HEADER_H
+#ifndef S4532390_LIB_HAMMING_H
+#define S4532390_LIB_HAMMING_H
 
 #include <stdint.h>
 
