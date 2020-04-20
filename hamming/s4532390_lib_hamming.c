@@ -4,7 +4,7 @@
 *@file mylib/hamming/s4532390_lib_hamming.c
 *@author Robert Francis - 45323906
 *@date 18/04/2020
-*@brief Hamming library
+*@brief Hamming Encoding Library
 *REFERENCE:
 csse3010_mylib_hal_hamming.pdf 
 *********************
@@ -24,6 +24,7 @@ csse3010_mylib_hal_hamming.pdf
 #include "s4532390_lib_hamming.h"
 #include "debug_printf.h"
 #include <stdint.h>
+
 
 /**
 *@brief Encodes a single byte using hamming 7/4
@@ -82,36 +83,39 @@ uint8_t s4532390_lib_hamming_byte_decode(uint8_t in) {
 
     //Error correction
     if (syndrome != 0) {
-        
+
         if (!s4532390_lib_hamming_parity_error(in)) {
-            debug_printf("2 Bit Error\r\n");
-            debug_flush();
+            
+            //Code for detecting 2 bit errors commented out as not marked
+            // debug_printf("2 Bit Error\r\n");
+            // debug_flush();
 
         } else if (s0 && !s1 && !s2) {
+
             h0 = !h0;
-
         } else if (!s0 && s1 && !s2) {
+
             h1 = !h1;
-
         } else if (!s0 && !s1 && s2) {
+
             h2 = !h2;
-
         } else if (!s0 && s1 && s2) {
+
             d0 = !d0;
-
         } else if (s0 && !s1 && s2) {
+
             d1 = !d1;
-
         } else if (s0 && s1 && !s2) {
-            d2 = !d2;
 
+            d2 = !d2;
         } else if (s0 && s1 && s2) {
+
             d3 = !d3;
         }   
     }
     
+    //Returns data nibble
     return  (d0 << 0) | (d1 << 1) | (d2 << 2) | (d3 << 3);
-    
 }
 
 /**
@@ -120,6 +124,7 @@ uint8_t s4532390_lib_hamming_byte_decode(uint8_t in) {
 *@retval an encoded byte
 */
 uint8_t hamming_hbyte_encode(uint8_t input) {
+
     uint8_t d0, d1, d2, d3;
 	uint8_t p0 = 0, h0, h1, h2;
 	uint8_t z;

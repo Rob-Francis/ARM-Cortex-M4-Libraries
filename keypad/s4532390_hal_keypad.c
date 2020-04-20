@@ -1,10 +1,10 @@
 /**
 *********************
 *********************
-*@file mylib/keypad/s4532390_hal_keypad.h
+*@file mylib/keypad/s4532390_hal_keypad.c
 *@author Robert Francis - 45323906
 *@date 18/04/2020
-*@brief Keypad library
+*@brief Keypad Hal Library
 *REFERENCE:
 csse3010_mylib_hal_keypad.pdf 
 *********************
@@ -86,8 +86,8 @@ unsigned char KeypadToggle;
 *@retval None
 */
 void s4532390_hal_keypad_init() {
+
     KeypadFsmCurrentstate = INIT_STATE;
-    
 }
 
 
@@ -97,6 +97,7 @@ void s4532390_hal_keypad_init() {
 *@retval None
 */
 void s4532390_hal_keypad_deinit() {
+
     KeypadFsmCurrentstate = DEINIT_STATE;
 }
 
@@ -113,15 +114,16 @@ int get_keypad_num(int column, int row) {
 
             switch(row) {
                 case ROW1_STATE:
+
                     return 1;
-
                 case ROW2_STATE:
+
                     return 4;
-
                 case ROW3_STATE:
-                    return 7;
 
+                    return 7;
                 case ROW4_STATE:
+
                     return 0;
             }
 
@@ -129,15 +131,16 @@ int get_keypad_num(int column, int row) {
 
             switch(row) {
                 case ROW1_STATE:
+
                     return 2;
-
                 case ROW2_STATE:
+
                     return 5;
-
                 case ROW3_STATE:
-                    return 8;
 
+                    return 8;
                 case ROW4_STATE:
+
                     return 15;
             }
 
@@ -145,15 +148,16 @@ int get_keypad_num(int column, int row) {
 
             switch(row) {
                 case ROW1_STATE:
+
                     return 3;
-
                 case ROW2_STATE:
+
                     return 6;
-
                 case ROW3_STATE:
-                    return 9;
 
+                    return 9;
                 case ROW4_STATE:
+                
                     return 14;
             }
 
@@ -161,15 +165,16 @@ int get_keypad_num(int column, int row) {
 
             switch(row) {
                 case ROW1_STATE:
+
                     return 10;
-
                 case ROW2_STATE:
+
                     return 11;
-
                 case ROW3_STATE:
-                    return 12;
 
+                    return 12;
                 case ROW4_STATE:
+
                     return 13;
             }
     }
@@ -196,13 +201,13 @@ void handle_rowscan() {
     
     //Prints characters 2 at a time
     if (KeypadToggle) {
+
         debug_printf("%X%X\r\n", KeypadValue, temp);
         debug_flush();
         KeypadToggle = 0;
-
     } else {
-        KeypadToggle = 1;
 
+        KeypadToggle = 1;
     }
     
     //Stores the last value pressed
@@ -221,21 +226,25 @@ void s4532390_hal_keypad_fsmprocessing() {
     switch(KeypadFsmCurrentstate) {
 
         case INIT_STATE:
+
             keypad_gpio_init();
             KeypadFsmLastState = INIT_STATE;
             KeypadFsmCurrentstate = COL1_STATE;
             break;   
 
         case ROWSCAN_STATE:
+
             handle_rowscan();
             KeypadFsmCurrentstate = (KeypadFsmLastState % 4) + 1;
             break;
 
         case DEINIT_STATE:
+
             s4532390_hal_keypad_deinit();
             break;
 
         default:
+
             keypad_writecol(KeypadFsmCurrentstate);
             KeypadFsmLastState = KeypadFsmCurrentstate;
             KeypadFsmCurrentstate = ROWSCAN_STATE;
@@ -301,15 +310,19 @@ int keypad_readrow() {
     KeypadStatus = 1;
 
     if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW1PINPORT, S4532390_HAL_KEYPAD_ROW1PIN)) {
+
         return out - (0x01);
     }
     if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW2PINPORT, S4532390_HAL_KEYPAD_ROW2PIN)) {
+
         return out - (0x01 << 1);
     } 
     if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW3PINPORT, S4532390_HAL_KEYPAD_ROW3PIN)) {
+
         return out - (0x01 << 2);
     } 
     if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW4PINPORT, S4532390_HAL_KEYPAD_ROW4PIN)) {
+
         return out - (0x01 << 3);
     } 
 
@@ -336,18 +349,22 @@ void keypad_writecol(int colval) {
     switch (colval) {
         
         case COL1_STATE:
+
             keypad_col1();
             break;
 
         case COL2_STATE:
+
             keypad_col2();
             break;
 
         case COL3_STATE:
+
             keypad_col3();
             break;
 
         case COL4_STATE:
+
             keypad_col4();
             break;
     }
@@ -361,6 +378,7 @@ void keypad_writecol(int colval) {
 *@retval 1 if keypad on, 0 if off
 */
 int s4532390_hal_keypad_read_status() {
+
     return KeypadStatus;
 }
 
@@ -371,6 +389,7 @@ int s4532390_hal_keypad_read_status() {
 *@retval Hexadecimal from 0 - 15
 */
 int s4532390_hal_keypad_read_key() {
+
     return KeypadValue;
 }
 
@@ -381,5 +400,6 @@ int s4532390_hal_keypad_read_key() {
 *@retval Ascii from 0 - 9 and A - F
 */
 char s4532390_hal_keypad_read_ascii() {
+
     return (KeypadValue <= 9) ? (KeypadValue + '0') : (KeypadValue + 'A' + 10);
 }
