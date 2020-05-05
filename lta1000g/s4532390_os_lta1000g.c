@@ -56,7 +56,7 @@ void s4532390_os_lta1000g_init(void) {
 *@retval None
 */
 void s4532390_os_lta1000g_deinit(void) {
-    vTaskSuspend(lta1000gHandle);
+    vTaskDelete(NULL);
 }
 
 /**

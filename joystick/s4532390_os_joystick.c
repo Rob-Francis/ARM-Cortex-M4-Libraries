@@ -61,7 +61,7 @@ void s4532390_os_joystick_init(void) {
 */
 void s4532390_os_joystick_deinit(void) {
     vSemaphoreDelete(ZSemaphore);
-    vTaskSuspend(joystickHandle);
+    vTaskDelete(NULL);
 }
 
 /**
