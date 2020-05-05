@@ -1,7 +1,7 @@
 /**
 *********************
 *********************
-*@file mylib/lta1000g/s4532390_OS_lta1000g.c
+*@file mylib/lta1000g/s4532390_os_lta1000g.c
 *@author Robert Francis - 45323906
 *@date 5/05/2020
 *@brief RTOS LTA100G library
@@ -37,6 +37,8 @@ void s4532390_os_lta1000g_deinit(void);
 
 /* Private variables ---------------------------------------------------------*/
 unsigned short lightbarValue; // Stores current value written into lightbar
+TaskHandle_t lta1000gHandle;
+
 
 /**
 *@brief Initialises the lightbar task
@@ -44,7 +46,7 @@ unsigned short lightbarValue; // Stores current value written into lightbar
 *@retval None
 */
 void s4532390_os_lta1000g_init(void) {
-    xTaskCreate( (void *) &s4532390_Tasklta1000g, (const signed char *) "LTAG", LTA1000GTASK_STACK_SIZE, NULL, LTA1000GTASK_PRIORITY, NULL );
+    xTaskCreate( (void *) &s4532390_Tasklta1000g, (const signed char *) "LTAG", LTA1000GTASK_STACK_SIZE, NULL, LTA1000GTASK_PRIORITY, &lta1000gHandle);
 
 }
 
@@ -54,7 +56,7 @@ void s4532390_os_lta1000g_init(void) {
 *@retval None
 */
 void s4532390_os_lta1000g_deinit(void) {
-
+    vTaskSuspend(lta1000gHandle);
 }
 
 /**
