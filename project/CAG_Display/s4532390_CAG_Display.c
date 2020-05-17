@@ -23,30 +23,72 @@
 #define SCREEN_HOME()  debug_printf("\e[H")
 
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
+EventGroupHandle_t CAG_EventGroup;
 
+unsigned char pauseCheck = 1;
 
+int updateTime = 100;
+
+void clearGrid() {
+    for (int i = 0; i < GRID_WIDTH; ++i) {
+        for (int j = 0; j < GRID_HEIGHT; ++j) {
+            Grid[i][j] = DEAD;
+        }
+    }
+}
 
 void s4532390_CAG_Display_Task() {
 
+
     for (;;) {
 
-
-        for (int j = 0; j < GRID_HEIGHT; ++j) {
-            
-            for (int i = 0; i < GRID_WIDTH; ++i) {
-                
-                if (Grid[i][j] == 0) {
-                    debug_printf("%s %s ", CELL_BLACK, CELL_BLACK);
-                } else {
-                    debug_printf("%s %s ", CELL_WHITE, CELL_WHITE);
-                }
-                
-            }
-
-            debug_printf("\n\r");
+        switch (xEventGroupWaitBits(CAG_EventGroup, 0xFF, pdTRUE, pdFALSE, 10)) {
+            case (1 << 8):
+                clearGrid();
+            break;
+            case (1 << 7):
+                pauseCheck = 1;
+            break;
+            case (1 << 6):
+                pauseCheck = 0;
+            break;
+            case (1 << 5):
+                updateTime = 500;
+            break;
+            case (1 << 4):
+                updateTime = 1000;
+            break;
+            case (1 << 3):
+                updateTime = 2000;
+            break;
+            case (1 << 2):
+                updateTime = 5000;
+            break;
+            case (1 << 1):
+                updateTime = 10000;
+            break;
+            case (1 << 0):
+            break;
         }
-        // debug_printf("\n\r");
 
-        vTaskDelay(50);
+        if (pauseCheck) {
+            
+            for (int j = 0; j < GRID_HEIGHT; ++j) {
+                
+                for (int i = 0; i < GRID_WIDTH; ++i) {
+                    
+                    if (Grid[i][j] == 0) {
+                        debug_printf("%s %s ", CELL_BLACK, CELL_BLACK);
+                    } else {
+                        debug_printf("%s %s ", CELL_WHITE, CELL_WHITE);
+                    }
+                    
+                }
+
+                debug_printf("\n\r");
+            }
+        }
+
+        vTaskDelay(updateTime);
     }
 }

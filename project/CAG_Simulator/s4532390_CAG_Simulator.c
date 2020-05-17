@@ -9,8 +9,7 @@
 #include "s4532390_CAG_Display.h"
 
 
-#define ALIVE 1
-#define DEAD 0
+int updateTime;
 
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
@@ -64,6 +63,6 @@ void s4532390_CAG_Simulator_Task() {
           
         }
         
-        vTaskDelay(100);
+        vTaskDelay(updateTime);
     }
 }
