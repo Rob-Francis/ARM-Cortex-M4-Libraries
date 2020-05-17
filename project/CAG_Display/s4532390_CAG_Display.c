@@ -22,7 +22,7 @@
 #define SCREEN_CLEAR()  debug_printf("\e[2J")
 #define SCREEN_HOME()  debug_printf("\e[H")
 
-char Grid[GRID_WIDTH][GRID_HEIGHT];
+unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 
 
@@ -34,16 +34,19 @@ void s4532390_CAG_Display_Task() {
         for (int j = 0; j < GRID_HEIGHT; ++j) {
             
             for (int i = 0; i < GRID_WIDTH; ++i) {
-
-                debug_printf("%s %s ", CELL_BLACK, CELL_BLACK);
-                // debug_printf("here\r\n");
-
+                
+                if (Grid[i][j] == 0) {
+                    debug_printf("%s %s ", CELL_BLACK, CELL_BLACK);
+                } else {
+                    debug_printf("%s %s ", CELL_WHITE, CELL_WHITE);
+                }
+                
             }
 
             debug_printf("\n\r");
         }
         debug_printf("\n\r");
 
-        vTaskDelay(1000);
+        vTaskDelay(100);
     }
 }
