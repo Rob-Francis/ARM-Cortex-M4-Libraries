@@ -6,6 +6,8 @@
 #include "queue.h"
 #include "semphr.h"
 
+#include "s4532390_CAG_Display.h"
+
 #define CELL_BLACK "\e[7;30;40m"
 #define CELL_RED	"\e[7;31;41m"
 #define CELL_GREEN	"\e[7;32;42m"
@@ -15,8 +17,6 @@
 #define CELL_CYAN		"\e[7;36;46m"
 #define CELL_WHITE 		"\e[7;37;47m"
 
-#define GRID_WIDTH 15
-#define GRID_HEIGHT 15
 
 
 #define SCREEN_CLEAR()  debug_printf("\e[2J")
@@ -45,8 +45,8 @@ void s4532390_CAG_Display_Task() {
 
             debug_printf("\n\r");
         }
-        debug_printf("\n\r");
+        // debug_printf("\n\r");
 
-        vTaskDelay(100);
+        vTaskDelay(50);
     }
 }

@@ -6,9 +6,8 @@
 #include "queue.h"
 #include "semphr.h"
 
+#include "s4532390_CAG_Display.h"
 
-#define GRID_WIDTH 15
-#define GRID_HEIGHT 15
 
 #define ALIVE 1
 #define DEAD 0
@@ -58,9 +57,10 @@ void s4532390_CAG_Simulator_Task() {
                 } else if (Grid[i][j] == DEAD && neighbours == 3) {
 
                     Grid[i][j] = ALIVE;
-                }
+                } 
                 
             }
+
           
         }
         
