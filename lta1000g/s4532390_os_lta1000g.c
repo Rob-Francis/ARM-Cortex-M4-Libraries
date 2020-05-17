@@ -29,7 +29,7 @@ void s4532390_os_lta1000g_deinit(void);
 #include "queue.h"
 #include "semphr.h"
 #include "s4532390_hal_lta1000g.h"
-#include "s4532390_OS_lta1000g.h"
+#include "s4532390_os_lta1000g.h"
 
 /* Private define ------------------------------------------------------------*/
 #define LTA1000GTASK_PRIORITY					( tskIDLE_PRIORITY + 6 ) //Task priority
@@ -56,7 +56,7 @@ void s4532390_os_lta1000g_init(void) {
 *@retval None
 */
 void s4532390_os_lta1000g_deinit(void) {
-    vTaskSuspend(lta1000gHandle);
+    vTaskDelete(NULL);
 }
 
 /**

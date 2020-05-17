@@ -27,7 +27,7 @@ void s4532390_TaskJoystickZ(void);
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
-#include "s4532390_OS_joystick.h"
+#include "s4532390_os_joystick.h"
 
 /* Private define ------------------------------------------------------------*/
 #define DEBOUNCE_TICKS 500 //ms waited for debouncing
@@ -60,7 +60,8 @@ void s4532390_os_joystick_init(void) {
 *@retval None
 */
 void s4532390_os_joystick_deinit(void) {
-    vTaskSuspend(joystickHandle);
+    vSemaphoreDelete(ZSemaphore);
+    vTaskDelete(NULL);
 }
 
 /**
