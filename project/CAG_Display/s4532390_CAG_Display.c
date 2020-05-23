@@ -17,62 +17,26 @@
 #define CELL_CYAN		"\e[7;36;46m"
 #define CELL_WHITE 		"\e[7;37;47m"
 
+#define CAG_BOARD_PRIORITY ( tskIDLE_PRIORITY + 4 )
+#define CAG_BOARD_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
 
 
 #define SCREEN_CLEAR()  debug_printf("\e[2J")
 #define SCREEN_HOME()  debug_printf("\e[H")
 
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
-EventGroupHandle_t CAG_EventGroup;
 
-unsigned char pauseCheck = 1;
 
-int updateTime = 100;
-
-void clearGrid() {
-    for (int i = 0; i < GRID_WIDTH; ++i) {
-        for (int j = 0; j < GRID_HEIGHT; ++j) {
-            Grid[i][j] = DEAD;
-        }
-    }
+void s4532390_CAG_Display_Init() {
+    xTaskCreate( (void *) &s4532390_CAG_Display_Task, (const signed char *) "DISPLAY", CAG_BOARD_TASK_STACK_SIZE, NULL, CAG_BOARD_PRIORITY, NULL );
 }
+
 
 void s4532390_CAG_Display_Task() {
 
 
     for (;;) {
 
-        switch (xEventGroupWaitBits(CAG_EventGroup, 0xFF, pdTRUE, pdFALSE, 10)) {
-            case (1 << 8):
-                clearGrid();
-            break;
-            case (1 << 7):
-                pauseCheck = 1;
-            break;
-            case (1 << 6):
-                pauseCheck = 0;
-            break;
-            case (1 << 5):
-                updateTime = 500;
-            break;
-            case (1 << 4):
-                updateTime = 1000;
-            break;
-            case (1 << 3):
-                updateTime = 2000;
-            break;
-            case (1 << 2):
-                updateTime = 5000;
-            break;
-            case (1 << 1):
-                updateTime = 10000;
-            break;
-            case (1 << 0):
-            break;
-        }
-
-        if (pauseCheck) {
-            
             for (int j = 0; j < GRID_HEIGHT; ++j) {
                 
                 for (int i = 0; i < GRID_WIDTH; ++i) {
@@ -87,8 +51,8 @@ void s4532390_CAG_Display_Task() {
 
                 debug_printf("\n\r");
             }
-        }
 
-        vTaskDelay(updateTime);
+        debug_printf("\n\r");
+        vTaskDelay(100);
     }
 }

@@ -5,13 +5,21 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "event_groups.h"
 
 #include "s4532390_CAG_Display.h"
+#include "s4532390_CAG_Simulator.h"
 
+#define CAG_SIMULATOR_PRIORITY ( tskIDLE_PRIORITY + 3 )
+#define CAG_SIMULATOR_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
 
-int updateTime;
+int updateTime = 1000;
 
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
+
+EventGroupHandle_t CAG_EventGroup;
+
+unsigned char simulationOn = 1;
 
 // Cell AliveCells[];
 
@@ -19,7 +27,14 @@ unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 // }
 
+void s4532390_CAG_Simulator_Init() {
+
+    xTaskCreate( (void *) &s4532390_CAG_Simulator_Task, (const signed char *) "SIMULATOR", CAG_SIMULATOR_TASK_STACK_SIZE, NULL, CAG_SIMULATOR_PRIORITY, NULL );
+
+}
+
 int countNeighbours(int cellX, int cellY) {
+
     int neighbours = 0;
 
     for (int i = cellX - 1; i < cellX + 1; ++i) {
@@ -38,30 +53,83 @@ int countNeighbours(int cellX, int cellY) {
 
 }
 
+void clearGrid() {
+
+    for (int i = 0; i < GRID_WIDTH; ++i) {
+        for (int j = 0; j < GRID_HEIGHT; ++j) {
+            Grid[i][j] = DEAD;
+        }
+    }
+}
+
+
+void CAG_Step() {
+
+    for (int j = 0; j < GRID_HEIGHT; ++j) {
+            
+        for (int i = 0; i < GRID_WIDTH; ++i) {
+            
+            int neighbours = countNeighbours(i, j);
+            
+            if (Grid[i][j] == ALIVE && (neighbours < 2 || neighbours > 3)) {
+
+                Grid[i][j] = DEAD;
+                    
+            } else if (Grid[i][j] == DEAD && neighbours == 3) {
+
+                Grid[i][j] = ALIVE;
+            } 
+        }         
+    }
+}
+
+
+void handleEventBits() {
+
+    switch (xEventGroupWaitBits(CAG_EventGroup, 0xFF, pdTRUE, pdFALSE, 10)) {
+            case (1 << 8):
+                clearGrid();
+            break;
+            case (1 << 7):
+                simulationOn = 1;
+            break;
+            case (1 << 6):
+                simulationOn = 0;
+            break;
+            case (1 << 5):
+                updateTime = 500;
+            break;
+            case (1 << 4):
+                updateTime = 1000;
+            break;
+            case (1 << 3):
+                updateTime = 2000;
+            break;
+            case (1 << 2):
+                updateTime = 5000;
+            break;
+            case (1 << 1):
+                updateTime = 10000;
+            break;
+            case (1 << 0):
+            break;
+        }
+
+
+
+}
+
+
 void s4532390_CAG_Simulator_Task() {
 
     for (;;) {
 
-
-        for (int j = 0; j < GRID_HEIGHT; ++j) {
-            
-            for (int i = 0; i < GRID_WIDTH; ++i) {
-                
-                int neighbours = countNeighbours(i, j);
-                
-                if (Grid[i][j] == ALIVE && (neighbours < 2 || neighbours > 3)) {
-
-                    Grid[i][j] = DEAD;
-                     
-                } else if (Grid[i][j] == DEAD && neighbours == 3) {
-
-                    Grid[i][j] = ALIVE;
-                } 
-                
-            }
-
-          
+        handleEventBits();
+        
+        if (simulationOn) {
+            CAG_Step();
         }
+        
         
         vTaskDelay(updateTime);
     }

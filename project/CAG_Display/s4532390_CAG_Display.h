@@ -8,9 +8,8 @@
 #define DEAD 0
 
 extern unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
-extern EventGroupHandle_t CAG_EventGroup;
 
-extern int updateTime;
+void s4532390_CAG_Display_Init();
 
 void s4532390_CAG_Display_Task();
 
