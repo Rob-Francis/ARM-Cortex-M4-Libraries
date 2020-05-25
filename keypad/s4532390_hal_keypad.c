@@ -102,6 +102,12 @@ void s4532390_hal_keypad_deinit() {
 }
 
 
+// void keypad_writecol(uint8_t colval) {
+//     for (int i = 0; c < 4; c++) {
+//         HAL_GPIO_WritePin(COL_PIN_PORTS[i], COL_PINS[i], colval & (1 << i));
+//     }
+// }
+
 /**
 *@brief Converts column and row to hexadecimal value of keypad
 *@param column and row - column of keypad and row of keypad
@@ -273,7 +279,7 @@ void keypad_gpio_init() {
     S4532390_HAL_KEYPAD_ROW4PINCLK();
         
     GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;		//Output Mode
-    GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable pull down
+    GPIO_InitStructure.Pull = GPIO_PULLUP;			//Enable pull up
     GPIO_InitStructure.Speed = GPIO_SPEED_FAST;			//Pin latency
 
     //Sets output pins and initialises them
@@ -285,6 +291,8 @@ void keypad_gpio_init() {
     HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL3PINPORT, &GPIO_InitStructure);
     GPIO_InitStructure.Pin = S4532390_HAL_KEYPAD_COL4PIN;
     HAL_GPIO_Init(S4532390_HAL_KEYPAD_COL4PINPORT, &GPIO_InitStructure);
+
+    GPIO_InitStructure.Pull = GPIO_PULLDOWN;			//Enable pull down
 
     //Sets input pins and initialises them
     GPIO_InitStructure.Mode = GPIO_MODE_INPUT;
@@ -309,19 +317,19 @@ int keypad_readrow() {
     int out = ROW_EMPTY_STATE;
     KeypadStatus = 1;
 
-    if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW1PINPORT, S4532390_HAL_KEYPAD_ROW1PIN)) {
+    if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW1PINPORT, S4532390_HAL_KEYPAD_ROW1PIN)) {
 
         return out - (0x01);
     }
-    if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW2PINPORT, S4532390_HAL_KEYPAD_ROW2PIN)) {
+    if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW2PINPORT, S4532390_HAL_KEYPAD_ROW2PIN)) {
 
         return out - (0x01 << 1);
     } 
-    if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW3PINPORT, S4532390_HAL_KEYPAD_ROW3PIN)) {
+    if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW3PINPORT, S4532390_HAL_KEYPAD_ROW3PIN)) {
 
         return out - (0x01 << 2);
     } 
-    if (HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW4PINPORT, S4532390_HAL_KEYPAD_ROW4PIN)) {
+    if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW4PINPORT, S4532390_HAL_KEYPAD_ROW4PIN)) {
 
         return out - (0x01 << 3);
     } 
@@ -340,32 +348,31 @@ int keypad_readrow() {
 void keypad_writecol(int colval) {
 
     //Turns columns off first
-    keypad_col1_off();
-    keypad_col2_off();
-    keypad_col3_off();
-    keypad_col4_off();
-
+    keypad_col1();
+    keypad_col2();
+    keypad_col3();
+    keypad_col4();
     
     switch (colval) {
         
         case COL1_STATE:
 
-            keypad_col1();
+            keypad_col1_off();
             break;
 
         case COL2_STATE:
 
-            keypad_col2();
+            keypad_col2_off();
             break;
 
         case COL3_STATE:
 
-            keypad_col3();
+            keypad_col3_off();
             break;
 
         case COL4_STATE:
 
-            keypad_col4();
+            keypad_col4_off();
             break;
     }
 

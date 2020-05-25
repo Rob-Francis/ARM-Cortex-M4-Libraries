@@ -8,3 +8,5 @@ CFLAGS += -I$(KEYPAD_PATH)
 
 LIBSRCS += $(KEYPAD_PATH)/s4532390_hal_keypad.c
 
+# LIBSRCS += $(KEYPAD_PATH)/s4532390_os_keypad.c
+
