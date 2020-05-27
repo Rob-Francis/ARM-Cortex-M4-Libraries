@@ -28,7 +28,8 @@ unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 
 void s4532390_CAG_Display_Init() {
-    xTaskCreate( (void *) &s4532390_CAG_Display_Task, (const signed char *) "DISPLAY", CAG_BOARD_TASK_STACK_SIZE, NULL, CAG_BOARD_PRIORITY, NULL );
+    xTaskCreate( (void *) &s4532390_CAG_Display_Task, (const signed char *) "DISPLAY", CAG_BOARD_TASK_STACK_SIZE, NULL, CAG_BOARD_PRIORITY, NULL ); 
+    // PAUSED FOR TESTING
 }
 
 

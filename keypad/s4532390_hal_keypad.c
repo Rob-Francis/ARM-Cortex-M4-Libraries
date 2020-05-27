@@ -79,6 +79,7 @@ unsigned char KeypadValue;
 //Toggle variable so 2 characters are printed per line
 unsigned char KeypadToggle;
 
+int statusCount;
 
 /**
 *@brief Set the state of the keypadFSM to INIT state
@@ -197,10 +198,19 @@ void handle_rowscan() {
     //Scans row pins
     int tempRow = keypad_readrow();
 
+    // debug_printf("Status: %d\r\n", KeypadStatus);
+
     //Leaves if nothing pressed
     if (tempRow == ROW_EMPTY_STATE) {
+        ++statusCount;
+
+        if (statusCount % 4 == 0) {
+            KeypadStatus = 0;
+        }
         return;
     }
+
+
 
     //Converts into a hex value
     unsigned char temp = get_keypad_num(KeypadFsmLastState, tempRow);
@@ -315,26 +325,30 @@ void keypad_gpio_init() {
 int keypad_readrow() {
 
     int out = ROW_EMPTY_STATE;
-    KeypadStatus = 1;
+    
 
     if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW1PINPORT, S4532390_HAL_KEYPAD_ROW1PIN)) {
-
+        statusCount = 0;
+        KeypadStatus = 1;
         return out - (0x01);
     }
     if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW2PINPORT, S4532390_HAL_KEYPAD_ROW2PIN)) {
-
+        statusCount = 0;
+        KeypadStatus = 1;
         return out - (0x01 << 1);
     } 
     if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW3PINPORT, S4532390_HAL_KEYPAD_ROW3PIN)) {
-
+        statusCount = 0;
+        KeypadStatus = 1;
         return out - (0x01 << 2);
     } 
     if (!HAL_GPIO_ReadPin(S4532390_HAL_KEYPAD_ROW4PINPORT, S4532390_HAL_KEYPAD_ROW4PIN)) {
-
+        statusCount = 0;
+        KeypadStatus = 1;
         return out - (0x01 << 3);
     } 
 
-    KeypadStatus = 0;
+    
 
     return out;
 }

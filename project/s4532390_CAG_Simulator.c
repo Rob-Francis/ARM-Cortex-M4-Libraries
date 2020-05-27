@@ -30,6 +30,7 @@ unsigned char simulationOn = 1;
 void s4532390_CAG_Simulator_Init() {
 
     xTaskCreate( (void *) &s4532390_CAG_Simulator_Task, (const signed char *) "SIMULATOR", CAG_SIMULATOR_TASK_STACK_SIZE, NULL, CAG_SIMULATOR_PRIORITY, NULL );
+    CAG_EventGroup = xEventGroupCreate();
 
 }
 
@@ -87,31 +88,29 @@ void CAG_Step() {
 void handleEventBits() {
 
     switch (xEventGroupWaitBits(CAG_EventGroup, 0xFF, pdTRUE, pdFALSE, 10)) {
-            case (1 << 8):
+            case (CLEAR_GRID_BIT):
                 clearGrid();
             break;
-            case (1 << 7):
+            case (START_BIT):
                 simulationOn = 1;
             break;
-            case (1 << 6):
+            case (STOP_BIT):
                 simulationOn = 0;
             break;
-            case (1 << 5):
+            case (1 << 3):
                 updateTime = 500;
             break;
             case (1 << 4):
                 updateTime = 1000;
             break;
-            case (1 << 3):
+            case (1 << 5):
                 updateTime = 2000;
             break;
-            case (1 << 2):
+            case (1 << 6):
                 updateTime = 5000;
             break;
-            case (1 << 1):
+            case (1 << 7):
                 updateTime = 10000;
-            break;
-            case (1 << 0):
             break;
         }
 
