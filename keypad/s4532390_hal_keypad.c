@@ -218,8 +218,8 @@ void handle_rowscan() {
     //Prints characters 2 at a time
     if (KeypadToggle) {
 
-        debug_printf("%X%X\r\n", KeypadValue, temp);
-        debug_flush();
+        // debug_printf("%X%X\r\n", KeypadValue, temp);
+        // debug_flush();
         KeypadToggle = 0;
     } else {
 

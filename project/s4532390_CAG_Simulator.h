@@ -3,8 +3,9 @@
 
 #include "FreeRTOS.h"
 #include "event_groups.h"
+#include "s4532390_CAG_Display.h"
 
-extern unsigned char Grid[15][15];
+extern unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 void s4532390_CAG_Simulator_Init();
 

@@ -12,11 +12,13 @@
 #include "s4532390_os_keypad.h"
 #include "s4532390_CAG_PushButton.h"
 #include "s4532390_CAG_Simulator.h"
+#include "s4532390_CAG_Display.h"
 
 EventGroupHandle_t keypadEventGroup;
 EventGroupHandle_t CAG_EventGroup;
 
 unsigned char keypadToggle;
+unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 #define CAG_KEYPAD_GRID_PRIORITY (tskIDLE_PRIORITY + 5)
 #define CAG_KEYPAD_GRID_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE * 2)
@@ -30,7 +32,7 @@ void clearKeypad() {
 
 }
 
-void handleKeypadBits(EventBits_t keypadBits) {
+void handleKeypadGridBits(EventBits_t keypadBits) {
 
     int bitSet = 0;
 
@@ -44,10 +46,13 @@ void handleKeypadBits(EventBits_t keypadBits) {
         keypadBits = keypadBits >> 1;
     }
 
-
-    debug_printf("Bit set %d\r\n", bitSet);
-    
     if (bitSet > 0 && bitSet < 10) {
+
+        int xOffset = (bitSet - 1) % 3;
+        int yOffset = (bitSet - 1) / 3;
+
+
+        Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = ~Grid[(subX * 3) + xOffset][(subY * 3) + yOffset];
 
 
     } else if (bitSet == 10) {
@@ -62,10 +67,14 @@ void handleKeypadBits(EventBits_t keypadBits) {
         xEventGroupSetBits(CAG_EventGroup, CLEAR_GRID_BIT);
     } else if (bitSet == 0) {
 
-        ++subX;
+        if (subX < 5) {
+            ++subX;
+        }
     } else if (bitSet == 15) {
         
-        ++subY;
+        if (subY < 5) {
+            ++subY;
+        }
     }
 }
 
@@ -85,7 +94,7 @@ void s4532390_CAG_Keypad_Grid_Task() {
                 keypadBits = xEventGroupWaitBits(keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
 
                 if (keypadBits != previousKeypadBits && keypadBits != 0) {
-                    handleKeypadBits(keypadBits);
+                    handleKeypadGridBits(keypadBits);
                 } 
                 
                 previousKeypadBits = keypadBits;
