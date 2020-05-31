@@ -14,7 +14,7 @@
 #define CAG_PUSH_BUTTON_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE * 2)
 
 SemaphoreHandle_t PBSemaphore;	/* Semaphore for keypad states */
-unsigned char keypadToggle;
+unsigned char s4532390_keypadToggle;
 int lastPressTime;
 
 void s4532390_CAG_PushButton_Task() {
@@ -26,7 +26,7 @@ void s4532390_CAG_PushButton_Task() {
 			/* See if we can obtain the  semaphore. If the semaphore is not available
           	 wait 10 ticks to see if it becomes free. */
 			if ( xSemaphoreTake( PBSemaphore, 10 ) == pdTRUE ) {
-                keypadToggle = ~keypadToggle;
+                s4532390_keypadToggle = ~s4532390_keypadToggle;
             }
         }
         vTaskDelay(40);

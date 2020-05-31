@@ -36,10 +36,15 @@
 #define DLT_STATE 5
 #define CRE_STATE 6
 
-EventGroupHandle_t CAG_EventGroup;
-EventGroupHandle_t keypadEventGroup;
-char command[6];
+EventGroupHandle_t s4532390_CAG_EventGroup;
+EventGroupHandle_t s4532390_keypadEventGroup;
+QueueHandle_t s4532390_CAG_Queue;
+
+caMessage_t currentMessage;
+
 int currentState = IDLE_STATE;
+int cyclesInState;
+
 
 void runCommand() {
 
@@ -51,18 +56,18 @@ void runCommand() {
     // debug_printf("/r/n");
 }
 
-void addToCommand(char currentChar) {
+// void addToCommand(char currentChar) {
 
-    for (int i = 0; i < 6; ++i) {
-        if (command[i] == 0) {
-            command[i] = currentChar;
-            return;
-        }
-    }
+//     for (int i = 0; i < 6; ++i) {
+//         if (command[i] == 0) {
+//             command[i] = currentChar;
+//             return;
+//         }
+//     }
 
 
 
-}
+// }
 
 char incrementCharacter(char in) {
 
@@ -123,9 +128,171 @@ char convertToCharValue(EventBits_t bits) {
     }
 }
 
+int isNumeric(char in) {
+    return (in >= '0' && in <= '9') ? 1 : 0;
+}
 
+
+void handleDeleteState(char in) {
+
+    if (((cyclesInState == 1) && (in == 'L')) ||
+        ((cyclesInState == 2) && (in == 'T'))) {
+        
+        ++cyclesInState;
+    } else if (cyclesInState == 3) {
+
+        if (in == '0') {
+
+            s4532390_CAG_Simulator_Deinit();
+
+        } else if (in == '1') {
+
+            
+        }
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;  
+        
+
+    } else {
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    }
+    
+}
+
+void handleCreateState(char in) {
+
+    if (((cyclesInState == 1) && (in == 'R')) ||
+        ((cyclesInState == 2) && (in == 'E'))) {
+        
+        ++cyclesInState;
+    } else if (cyclesInState == 3) {
+
+        if (in == '0') {
+
+            s4532390_CAG_Simulator_Init();
+
+        } else if (in == '1') {
+
+            
+        }
+          
+        cyclesInState = 0;
+        currentState = IDLE_STATE;  
+        
+
+    } else {
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    }
+    
+}
+
+
+void handleGliderState(char in) {
+
+    if (((cyclesInState == 1) && (in == 'L')) ||
+        ((cyclesInState == 2) && (in == 'D'))) {
+        
+        ++cyclesInState;
+    } else if (cyclesInState == 3 && isNumeric(in)) {
+        
+        currentMessage.cell_x = in - '0';
+    } else if (cyclesInState == 4 && isNumeric(in)) {
+
+        currentMessage.cell_y = in - '0';
+        currentMessage.type = SPACE_SHIP;
+        xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    } else {
+        
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    }
+}
+
+
+void handleOscillatorState(char in) {
+
+    if (((cyclesInState == 1) && (in == 'S')) ||
+        ((cyclesInState == 2) && (in == 'C'))) {
+        
+        ++cyclesInState;
+    } else if (cyclesInState == 3) {
+
+        if (in == '0' || in == '1' || in == '2') {
+
+            currentMessage.type = OSCILLATOR | (in - '0');
+        } else {
+            
+            cyclesInState = 0;
+            currentState = IDLE_STATE;  
+        }
+
+    } else if (cyclesInState == 4 && isNumeric(in)) {
+
+        currentMessage.cell_x = in - '0';
+    } else if (cyclesInState == 4 && isNumeric(in)) {
+
+        currentMessage.cell_y = in - '0';
+        
+        xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    } else {
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    }
+    
+}
+
+void handleStillState(char in) {
+
+    if (((cyclesInState == 1) && (in == 'T')) ||
+        ((cyclesInState == 2) && (in == 'L'))) {
+        
+        ++cyclesInState;
+    } else if (cyclesInState == 3) {
+        
+        if (in == '0' || in == '1' || in == '2') {
+
+            currentMessage.type = STILL_LIFE | (in - '0');
+        } else {
+            
+            cyclesInState = 0;
+            currentState = IDLE_STATE;  
+        }
+    } else if (cyclesInState == 4 && isNumeric(in)) {
+        
+        currentMessage.cell_x = in - '0';
+    } else if (cyclesInState == 5 && isNumeric(in)) {
+
+        currentMessage.cell_y = in - '0';
+        currentMessage.type = LIVE_CELL;
+        xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
+
+
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    } else {
+        
+        cyclesInState = 0;
+        currentState = IDLE_STATE;
+    }
+    
+}
 
 void handleIdleState(char in) {
+
+    ++cyclesInState;
+
     switch (in) {
         case 'S':
             currentState = STL_STATE;
@@ -137,13 +304,13 @@ void handleIdleState(char in) {
             currentState = GLD_STATE;
         break;
         case '*':
-            xEventGroupSetBits(CAG_EventGroup, START_BIT);
+            xEventGroupSetBits(s4532390_CAG_EventGroup, START_BIT);
         break;
         case '#':
-            xEventGroupSetBits(CAG_EventGroup, STOP_BIT);
+            xEventGroupSetBits(s4532390_CAG_EventGroup, STOP_BIT);
         break;
         case '0':
-            xEventGroupSetBits(CAG_EventGroup, CLEAR_GRID_BIT);
+            xEventGroupSetBits(s4532390_CAG_EventGroup, CLEAR_GRID_BIT);
         break;
         case 'D':
             currentState = DLT_STATE;
@@ -151,32 +318,36 @@ void handleIdleState(char in) {
         case 'C':
             currentState = CRE_STATE;
         break;
+        default:
+            currentState = IDLE_STATE;
+        break;
     }
 }
 
 void mnemoicStateMachine(char in) {
 
-    debug_printf("Character: %c\r\n", in);
+    // debug_printf("Character: %c\r\n", in);
     
 
     switch (currentState) {
         case IDLE_STATE:
             handleIdleState(in);
+            cyclesInState = 0;
         break;
         case STL_STATE:
-
+            handleStillState(in);
         break;
         case OSC_STATE:
-
+            handleOscillatorState(in);
         break;
         case GLD_STATE:
-
+            handleGliderState(in);
         break;
         case DLT_STATE:
-
+            handleDeleteState(in);
         break;
         case CRE_STATE:
-
+            handleCreateState(in);
         break;
     }
             
@@ -192,7 +363,7 @@ void s4532390_CAG_Keypad_Mnemonic_Task() {
 
     for (;;) {
 
-        if (keypadToggle) {
+        if (s4532390_keypadToggle) {
 
             BRD_LEDRedOff();
             BRD_LEDBlueOn();
@@ -204,7 +375,7 @@ void s4532390_CAG_Keypad_Mnemonic_Task() {
                 currentChar = 0;
             }
 
-            int keypadBits = xEventGroupWaitBits(keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
+            int keypadBits = xEventGroupWaitBits(s4532390_keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
 
             if (keypadBits != previousBits && keypadBits != 0) {
 

@@ -14,8 +14,9 @@
 #include "s4532390_CAG_Simulator.h"
 #include "s4532390_CAG_Display.h"
 
-EventGroupHandle_t keypadEventGroup;
-EventGroupHandle_t CAG_EventGroup;
+EventGroupHandle_t s4532390_keypadEventGroup;
+EventGroupHandle_t s4532390_CAG_EventGroup;
+QueueHandle_t s4532390_CAG_Queue;
 
 unsigned char keypadToggle;
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
@@ -35,6 +36,7 @@ void clearKeypad() {
 void handleKeypadGridBits(EventBits_t keypadBits) {
 
     int bitSet = 0;
+    caMessage_t message;
 
     for (int i = 0; i < 16; ++i) {
         
@@ -52,19 +54,30 @@ void handleKeypadGridBits(EventBits_t keypadBits) {
         int yOffset = (bitSet - 1) / 3;
 
 
-        Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = ~Grid[(subX * 3) + xOffset][(subY * 3) + yOffset];
+        if (Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] == ALIVE) {
+            message.type = DEAD_CELL;
+            // Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = DEAD;
+        } else {
+            message.type = LIVE_CELL;
+            // Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = ALIVE;
+        }
+
+        message.cell_x = (subX * 3) + xOffset;
+        message.cell_y = (subY * 3) + yOffset;
+
+        xQueueSendToBack(s4532390_CAG_Queue, &message, 20);
 
 
     } else if (bitSet == 10) {
 
-        xEventGroupSetBits(CAG_EventGroup, START_BIT);
+        xEventGroupSetBits(s4532390_CAG_EventGroup, START_BIT);
     } else if (bitSet == 11) {
 
-        xEventGroupSetBits(CAG_EventGroup, STOP_BIT);
+        xEventGroupSetBits(s4532390_CAG_EventGroup, STOP_BIT);
     } else if (bitSet == 12) {
         
         clearKeypad();
-        xEventGroupSetBits(CAG_EventGroup, CLEAR_GRID_BIT);
+        xEventGroupSetBits(s4532390_CAG_EventGroup, CLEAR_GRID_BIT);
     } else if (bitSet == 0) {
 
         if (subX < 5) {

@@ -7,6 +7,7 @@
 #include "semphr.h"
 
 #include "s4532390_CAG_Display.h"
+#include "s4532390_CAG_Simulator.h"
 
 #define CELL_BLACK "\e[7;30;40m"
 #define CELL_RED	"\e[7;31;41m"
