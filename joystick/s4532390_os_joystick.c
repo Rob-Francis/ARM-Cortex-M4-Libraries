@@ -32,14 +32,13 @@ void s4532390_TaskJoystickZ(void);
 
 /* Private define ------------------------------------------------------------*/
 #define DEBOUNCE_TICKS 500 //ms waited for debouncing
-#define JOYSTICKTASK_STACK_SIZE	( configMINIMAL_STACK_SIZE * 2 ) //Size of stack for task
-#define JOYSTICKTASK_PRIORITY					( tskIDLE_PRIORITY + 7 ) //Priority of task
+#define JOYSTICKTASK_STACK_SIZE	( configMINIMAL_STACK_SIZE * 4 ) //Size of stack for task
+#define JOYSTICKTASK_PRIORITY					( tskIDLE_PRIORITY + 1 ) //Priority of task
 
 
 /* Private variables ---------------------------------------------------------*/
-SemaphoreHandle_t ZSemaphore;	/* Semaphore for pushbutton interrupt */
+
 int previousTickTime; //Stores time when last pressed
-unsigned char buttonToggle;
 TaskHandle_t joystickHandle;
 
 
@@ -76,10 +75,9 @@ void s4532390_os_joystick_deinit(void) {
 *@param  None
 *@retval Returns 1 if enough time has passed 0 otherwise
 */
-int debounceJoystickZ(void) {
+int s4532390_debounceJoystickZ(void) {
 
     int tick = xTaskGetTickCountFromISR(); // Gets current tick count
-
     if (tick > previousTickTime + DEBOUNCE_TICKS) { // Makes sure 500ms has passed
 
         previousTickTime = tick;
@@ -116,21 +114,9 @@ void s4532390_TaskJoystick(void) {
 
         message.joystick_x = S4532390_HAL_X_READ();
         message.joystick_y = S4532390_HAL_Y_READ();
+
         xQueueSendToFront(s4532390_JoystickQueue, (void *) &message, (portTickType) 10);
 
-        if (ZSemaphore != NULL) {	/* Check if semaphore exists */
-
-            /* See if we can obtain the semaphore. If the semaphore is not available
-                wait 10 ticks to see if it becomes free. */
-            if( xSemaphoreTake(ZSemaphore, 10) == pdTRUE) {
-
-                if (debounceJoystickZ()) {
-                    //Toggles variable if semaphore is obtained
-                    buttonToggle = ~buttonToggle & 0x01;
-                }
-            } 
-        }
-
-	vTaskDelay(20);
+	    vTaskDelay(100);
 	}
 }

@@ -28,9 +28,10 @@ void s4532390_os_joystick_deinit(void);
 
 void s4532390_TaskJoystick(void);
 
+int s4532390_debounceJoystickZ(void);
+
 extern QueueHandle_t s4532390_JoystickQueue;
 extern SemaphoreHandle_t ZSemaphore;
-extern unsigned char buttonToggle;
 
 typedef struct JoystickMessages {
     int joystick_x;

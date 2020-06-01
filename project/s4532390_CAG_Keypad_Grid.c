@@ -115,7 +115,7 @@ void s4532390_CAG_Keypad_Grid_Task() {
                 BRD_LEDRedOn();
                 BRD_LEDBlueOff();
 
-                keypadBits = xEventGroupWaitBits(s4532390_keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
+                keypadBits = xEventGroupWaitBits(s4532390_keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 30);
 
 //                 portENTER_CRITICAL();
 //                 debug_printf("Bits : %d\r\n", keypadBits);

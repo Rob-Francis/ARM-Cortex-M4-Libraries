@@ -219,9 +219,9 @@ void handleGliderState(char in) {
 
 void handleOscillatorState(char in) {
 
-    portENTER_CRITICAL();
-    debug_printf("In osci : %c\r\n", in);
-    portEXIT_CRITICAL();
+    // portENTER_CRITICAL();
+    // debug_printf("In osci : %c\r\n", in);
+    // portEXIT_CRITICAL();
 
     ++cyclesInState;
     if (((cyclesInState == 1) && (in == 'S')) ||
@@ -244,9 +244,9 @@ void handleOscillatorState(char in) {
     } else if (cyclesInState == 5 && isNumeric(in)) {
 
         currentMessage.cell_y = in - '0';
-        portENTER_CRITICAL();
-        debug_printf("OSCIL\r\n");
-        portEXIT_CRITICAL();
+        // portENTER_CRITICAL();
+        // debug_printf("OSCIL\r\n");
+        // portEXIT_CRITICAL();
         xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
 
         cyclesInState = 0;
@@ -340,9 +340,9 @@ void handleIdleState(char in) {
 
 void mnemoicStateMachine(char in) {
 
-    portENTER_CRITICAL();
-    debug_printf("Character: %c\r\n", in);
-    portEXIT_CRITICAL();
+    // portENTER_CRITICAL();
+    // debug_printf("Character: %c\r\n", in);
+    // portEXIT_CRITICAL();
 
     switch (currentState) {
         case IDLE_STATE:
