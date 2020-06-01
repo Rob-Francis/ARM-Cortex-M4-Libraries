@@ -37,7 +37,7 @@ void s4532390_cag_queue_task();
 //DEFINITIONS
 #define CAG_SIMULATOR_PRIORITY ( tskIDLE_PRIORITY + 5 )
 #define CAG_SIMULATOR_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
-#define CAG_QUEUE_TASK_DELAY 100
+#define CAG_QUEUE_TASK_DELAY 50
 
 //Times for queue handling
 #define MS500_TIME 500
@@ -366,7 +366,7 @@ void s4532390_cag_queue_task() {
         handle_event_bits();
 
         //Waits for a message from the queue and then handles it
-        if (xQueueReceive(s4532390_cagSimulatorQueue, &message, 20) == pdTRUE) {
+        if (xQueueReceive(s4532390_cagSimulatorQueue, &message, 30) == pdTRUE) {
             
             
             handle_message(message);

@@ -34,7 +34,7 @@ void s4532390_cag_display_task();
 #define CAG_BOARD_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
 #define SCREEN_CLEAR()  debug_printf("\e[2J")
 #define SCREEN_HOME()  debug_printf("\e[H")
-#define DISPLAY_REFRESH_TIME 200
+#define DISPLAY_REFRESH_TIME 500
 
 //EXTERNAL VARIABLES
 unsigned char s4532390_grid[GRID_WIDTH][GRID_HEIGHT]; // Grid of cells
