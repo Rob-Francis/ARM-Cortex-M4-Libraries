@@ -32,7 +32,7 @@ void s4532390_os_lta1000g_deinit(void);
 #include "s4532390_os_lta1000g.h"
 
 /* Private define ------------------------------------------------------------*/
-#define LTA1000GTASK_PRIORITY					( tskIDLE_PRIORITY + 6 ) //Task priority
+#define LTA1000GTASK_PRIORITY					( tskIDLE_PRIORITY + 2 ) //Task priority
 #define LTA1000GTASK_STACK_SIZE	( configMINIMAL_STACK_SIZE * 2 ) //Task stack size
 
 /* Private variables ---------------------------------------------------------*/
@@ -46,8 +46,10 @@ TaskHandle_t lta1000gHandle;
 *@retval None
 */
 void s4532390_os_lta1000g_init(void) {
-    xTaskCreate( (void *) &s4532390_Tasklta1000g, (const signed char *) "LTAG", LTA1000GTASK_STACK_SIZE, NULL, LTA1000GTASK_PRIORITY, &lta1000gHandle);
 
+    s4532390_hal_lta1000g_init();
+    xTaskCreate( (void *) &s4532390_Tasklta1000g, (const signed char *) "LTAG", LTA1000GTASK_STACK_SIZE, NULL, LTA1000GTASK_PRIORITY, &lta1000gHandle);
+    
 }
 
 /**
@@ -68,6 +70,6 @@ void s4532390_Tasklta1000g(void) {
 
   	for (;;) {        
 	  	  s4532390_hal_lta1000g_write(lightbarValue);
-        vTaskDelay(10); // Delay of 10ms
+        vTaskDelay(100); // Delay of 100ms
 	  }
 }

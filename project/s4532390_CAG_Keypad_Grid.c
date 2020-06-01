@@ -18,7 +18,8 @@ EventGroupHandle_t s4532390_keypadEventGroup;
 EventGroupHandle_t s4532390_CAG_EventGroup;
 QueueHandle_t s4532390_CAG_Queue;
 
-unsigned char keypadToggle;
+unsigned short lightbarValue;
+unsigned char s4532390_keypadToggle;
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
 
 #define CAG_KEYPAD_GRID_PRIORITY (tskIDLE_PRIORITY + 5)
@@ -30,7 +31,12 @@ int subX, subY;
 void clearKeypad() {
     subX = 0;
     subY = 0;
+    lightbarValue = lightbarValue & 0b1111000000;
 
+}
+
+void displaySubgridPositions() {
+    lightbarValue = (lightbarValue & 0b1111000000) | (subX << 3) | subY;
 }
 
 void handleKeypadGridBits(EventBits_t keypadBits) {
@@ -56,15 +62,19 @@ void handleKeypadGridBits(EventBits_t keypadBits) {
 
         if (Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] == ALIVE) {
             message.type = DEAD_CELL;
-            // Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = DEAD;
+            
         } else {
             message.type = LIVE_CELL;
-            // Grid[(subX * 3) + xOffset][(subY * 3) + yOffset] = ALIVE;
+            
         }
 
         message.cell_x = (subX * 3) + xOffset;
         message.cell_y = (subY * 3) + yOffset;
 
+        // portENTER_CRITICAL();
+        // debug_printf("here4\r\n");
+        // portEXIT_CRITICAL();
+        // BRD_LEDBlueToggle();
         xQueueSendToBack(s4532390_CAG_Queue, &message, 20);
 
 
@@ -89,6 +99,7 @@ void handleKeypadGridBits(EventBits_t keypadBits) {
             ++subY;
         }
     }
+
 }
 
 void s4532390_CAG_Keypad_Grid_Task() {
@@ -99,27 +110,30 @@ void s4532390_CAG_Keypad_Grid_Task() {
 
         for (;;) {
 
-            if (!keypadToggle) {
+            if (!s4532390_keypadToggle) {
                 // debug_printf("Grid got semaphore\r\n");
                 BRD_LEDRedOn();
                 BRD_LEDBlueOff();
 
-                keypadBits = xEventGroupWaitBits(keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
+                keypadBits = xEventGroupWaitBits(s4532390_keypadEventGroup, 0xFFFF, pdTRUE, pdFALSE, 10);
 
+//                 portENTER_CRITICAL();
+//                 debug_printf("Bits : %d\r\n", keypadBits);
+// portEXIT_CRITICAL();
                 if (keypadBits != previousKeypadBits && keypadBits != 0) {
                     handleKeypadGridBits(keypadBits);
                 } 
                 
                 previousKeypadBits = keypadBits;
 
-                
-                
-
-
+                displaySubgridPositions();
+            } else {
+                clearKeypad();
             }
 
+            
             vTaskDelay(100);
-        }
+        } 
 }
 
 void s4532390_CAG_Keypad_Grid_Init() {

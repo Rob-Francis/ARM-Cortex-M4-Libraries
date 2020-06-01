@@ -9,6 +9,7 @@
 
 #include "s4532390_CAG_Display.h"
 #include "s4532390_CAG_Simulator.h"
+#include "s4532390_os_lta1000g.h"
 
 #define CAG_SIMULATOR_PRIORITY ( tskIDLE_PRIORITY + 5 )
 #define CAG_SIMULATOR_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
@@ -16,6 +17,7 @@
 int updateTime = 1000;
 
 unsigned char Grid[GRID_WIDTH][GRID_HEIGHT];
+unsigned short lightbarValue;
 
 
 EventGroupHandle_t s4532390_CAG_EventGroup;
@@ -62,7 +64,7 @@ int countNeighbours(unsigned char tempGrid[GRID_WIDTH][GRID_HEIGHT], int cellX, 
             if (i >= 0 && i < GRID_WIDTH && j >= 0 && j < GRID_HEIGHT) {
 
                 if (i != cellX || j != cellY) {
-                    
+
                     neighbours += tempGrid[i][j];
                 }
             }
@@ -93,7 +95,7 @@ void CAG_Step() {
             int neighbours = countNeighbours(tempGrid, i, j);
 
             if (tempGrid[i][j] == ALIVE && (neighbours < 2 || neighbours > 3)) {
-                BRD_LEDBlueToggle();
+                
                 Grid[i][j] = DEAD;
                     
             } else if (tempGrid[i][j] == DEAD && neighbours == 3) {
@@ -133,9 +135,9 @@ void drawLoaf(int x, int y) {
 }
 
 void drawBlinker(int x, int y) {
-    Grid[x][y] = ALIVE;
-    Grid[x + 1][y] = ALIVE;
-    Grid[x + 1][y] = ALIVE;
+    Grid[x][y + 1] = ALIVE;
+    Grid[x + 1][y + 1] = ALIVE;
+    Grid[x + 2][y + 1] = ALIVE;
 }
 
 void drawToad(int x, int y) {
@@ -161,8 +163,6 @@ void drawGlider(int x, int y) {
 }
 
 void handleMessage(caMessage_t message) {
-
-    
 
     int x = message.cell_x;
     int y = message.cell_y;
@@ -211,19 +211,19 @@ void handleEventBits() {
             case (STOP_BIT):
                 simulationOn = 0;
             break;
-            case (1 << 3):
+            case (MS500_BIT):
                 updateTime = 500;
             break;
-            case (1 << 4):
+            case (S1_BIT):
                 updateTime = 1000;
             break;
-            case (1 << 5):
+            case (S2_BIT):
                 updateTime = 2000;
             break;
-            case (1 << 6):
+            case (S5_BIT):
                 updateTime = 5000;
             break;
-            case (1 << 7):
+            case (S10_BIT):
                 updateTime = 10000;
             break;
         }
@@ -237,19 +237,23 @@ void s4532390_CAG_Simulator_Task() {
         handleEventBits();
 
         caMessage_t message;
-        
-        
-
-        
-        while (xQueueReceive(s4532390_CAG_Queue, &message, 10) == pdTRUE) {
-                handleMessage(message);
-        }
 
         if (simulationOn) { 
             
             CAG_Step();
-
+            lightbarValue = lightbarValue ^ (1 << 9);
+            
         }
+        
+        while (xQueueReceive(s4532390_CAG_Queue, &message, 10) == pdTRUE) {
+            
+            // portENTER_CRITICAL();
+            // debug_printf("Got message %d\r\n", message.type);
+            // portEXIT_CRITICAL();
+            BRD_LEDRedOn();
+            handleMessage(message);
+        }
+
         
         
         vTaskDelay(updateTime);

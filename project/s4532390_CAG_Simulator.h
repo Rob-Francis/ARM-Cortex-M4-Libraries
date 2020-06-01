@@ -26,6 +26,11 @@ typedef struct caMessage{ int  type;//Type - Cell , or  Lifeform2
 #define CLEAR_GRID_BIT (1 << 0)
 #define START_BIT (1 << 1)
 #define STOP_BIT (1 << 2)
+#define MS500_BIT (1 << 3)
+#define S1_BIT (1 << 4)
+#define S2_BIT (1 << 5)
+#define S5_BIT (1 << 6)
+#define S10_BIT (1 << 7)
 
 #define LIVE_CELL (1 << 4 | 1 << 0)
 #define DEAD_CELL (1 << 4)

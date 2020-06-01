@@ -10,7 +10,7 @@
 #define KEYPAD_PRIORITY ( tskIDLE_PRIORITY + 6 )
 #define KEYPAD_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 5 )
 
-EventGroupHandle_t keypadEventGroup;
+EventGroupHandle_t s4532390_keypadEventGroup;
 
 int KeypadStatus;
 
@@ -18,7 +18,7 @@ void s4532390_OS_Keyad_Init() {
 
     xTaskCreate( (void *) &s4532390_Keypad_Task, (const signed char *) "KEYPAD", KEYPAD_TASK_STACK_SIZE, NULL, KEYPAD_PRIORITY, NULL );
 
-    keypadEventGroup = xEventGroupCreate();
+    s4532390_keypadEventGroup = xEventGroupCreate();
 }
 
 void s4532390_Keypad_Task() {
@@ -29,7 +29,7 @@ void s4532390_Keypad_Task() {
 
         if (KeypadStatus) {
 
-            xEventGroupSetBits(keypadEventGroup, 1 << s4532390_hal_keypad_read_key());
+            xEventGroupSetBits(s4532390_keypadEventGroup, 1 << s4532390_hal_keypad_read_key());
             BRD_LEDGreenOn();
         } else {
 
@@ -38,7 +38,7 @@ void s4532390_Keypad_Task() {
 
         
 
-        vTaskDelay(50);
+        vTaskDelay(10);
 
     }
 }

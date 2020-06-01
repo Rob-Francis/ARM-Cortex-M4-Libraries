@@ -1,7 +1,7 @@
 /**
 *********************
 *********************
-*@file mylib/lta1000g/s4532390_OS_lta1000g.h
+*@file mylib/lta1000g/s4532390_os_lta1000g.h
 *@author Robert Francis - 45323906
 *@date 5/05/2020
 *@brief RTOS LTA100G library

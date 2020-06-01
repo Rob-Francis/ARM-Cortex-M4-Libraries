@@ -1,6 +1,7 @@
 #include "board.h"
 #include "processor_hal.h"
 #include "debug_printf.h"
+#include "stdlib.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -46,32 +47,9 @@ int currentState = IDLE_STATE;
 int cyclesInState;
 
 
-void runCommand() {
-
-
-    // for (int i = 0; i < 6; ++i) {
-    //     debug_printf("%c", command[i]);
-    // }
-
-    // debug_printf("/r/n");
-}
-
-// void addToCommand(char currentChar) {
-
-//     for (int i = 0; i < 6; ++i) {
-//         if (command[i] == 0) {
-//             command[i] = currentChar;
-//             return;
-//         }
-//     }
-
-
-
-// }
-
 char incrementCharacter(char in) {
 
-    debug_printf("Increment\r\n");
+    // debug_printf("Increment\r\n");
 
     if (in == 'C' || in == 'F' || in == 'I' || in == 'L' || in == 'O' || in == 'V') {
 
@@ -82,6 +60,20 @@ char incrementCharacter(char in) {
     } else {
 
         return in + 1;
+    }
+}
+
+
+int inRange(char old, char new) {
+
+    int difference = old - new;
+
+    if (new == 'A' || new == 'D' || new == 'G' || new == 'J' || new == 'M' || new == 'T') {
+        return (difference <= 2 && difference >= 0) ? 1 : 0;
+    } else if (new == 'P' || new == 'W') {
+        return (difference <= 3 && difference >= 0) ? 1 : 0;
+    } else {
+        return 0;
     }
 }
 
@@ -193,11 +185,16 @@ void handleCreateState(char in) {
 
 
 void handleGliderState(char in) {
+    ++cyclesInState;
+
+    // portENTER_CRITICAL();
+    // debug_printf("In glider : %c\r\n", in);
+    // portEXIT_CRITICAL();
 
     if (((cyclesInState == 1) && (in == 'L')) ||
         ((cyclesInState == 2) && (in == 'D'))) {
         
-        ++cyclesInState;
+        
     } else if (cyclesInState == 3 && isNumeric(in)) {
         
         currentMessage.cell_x = in - '0';
@@ -205,6 +202,9 @@ void handleGliderState(char in) {
 
         currentMessage.cell_y = in - '0';
         currentMessage.type = SPACE_SHIP;
+        // portENTER_CRITICAL();
+        // debug_printf("Spaceship\r\n");
+        // portEXIT_CRITICAL();
         xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
 
         cyclesInState = 0;
@@ -219,10 +219,14 @@ void handleGliderState(char in) {
 
 void handleOscillatorState(char in) {
 
+    portENTER_CRITICAL();
+    debug_printf("In osci : %c\r\n", in);
+    portEXIT_CRITICAL();
+
+    ++cyclesInState;
     if (((cyclesInState == 1) && (in == 'S')) ||
         ((cyclesInState == 2) && (in == 'C'))) {
         
-        ++cyclesInState;
     } else if (cyclesInState == 3) {
 
         if (in == '0' || in == '1' || in == '2') {
@@ -237,10 +241,12 @@ void handleOscillatorState(char in) {
     } else if (cyclesInState == 4 && isNumeric(in)) {
 
         currentMessage.cell_x = in - '0';
-    } else if (cyclesInState == 4 && isNumeric(in)) {
+    } else if (cyclesInState == 5 && isNumeric(in)) {
 
         currentMessage.cell_y = in - '0';
-        
+        portENTER_CRITICAL();
+        debug_printf("OSCIL\r\n");
+        portEXIT_CRITICAL();
         xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
 
         cyclesInState = 0;
@@ -255,10 +261,15 @@ void handleOscillatorState(char in) {
 
 void handleStillState(char in) {
 
+    // portENTER_CRITICAL();
+    // debug_printf("In still : %c\r\n", in);
+    // portEXIT_CRITICAL();
+
+    ++cyclesInState;
+
     if (((cyclesInState == 1) && (in == 'T')) ||
         ((cyclesInState == 2) && (in == 'L'))) {
         
-        ++cyclesInState;
     } else if (cyclesInState == 3) {
         
         if (in == '0' || in == '1' || in == '2') {
@@ -275,7 +286,10 @@ void handleStillState(char in) {
     } else if (cyclesInState == 5 && isNumeric(in)) {
 
         currentMessage.cell_y = in - '0';
-        currentMessage.type = LIVE_CELL;
+        
+        // portENTER_CRITICAL();
+        // debug_printf("STILL\r\n");
+        // portEXIT_CRITICAL();
         xQueueSendToBack(s4532390_CAG_Queue, &currentMessage, 20);
 
 
@@ -291,7 +305,7 @@ void handleStillState(char in) {
 
 void handleIdleState(char in) {
 
-    ++cyclesInState;
+    // ++cyclesInState;
 
     switch (in) {
         case 'S':
@@ -326,8 +340,9 @@ void handleIdleState(char in) {
 
 void mnemoicStateMachine(char in) {
 
-    // debug_printf("Character: %c\r\n", in);
-    
+    portENTER_CRITICAL();
+    debug_printf("Character: %c\r\n", in);
+    portEXIT_CRITICAL();
 
     switch (currentState) {
         case IDLE_STATE:
@@ -353,6 +368,7 @@ void mnemoicStateMachine(char in) {
             
 }
 
+
 void s4532390_CAG_Keypad_Mnemonic_Task() {
 
     char currentChar = 0;
@@ -370,7 +386,7 @@ void s4532390_CAG_Keypad_Mnemonic_Task() {
 
             if (previousKeyPressTime + 1000 < HAL_GetTick() && currentChar != 0) { //If waited more than 0.5seconds to press
 
-                // debug_printf("time\r\n");
+
                 mnemoicStateMachine(currentChar);
                 currentChar = 0;
             }
@@ -380,24 +396,22 @@ void s4532390_CAG_Keypad_Mnemonic_Task() {
             if (keypadBits != previousBits && keypadBits != 0) {
 
                 char tempChar = convertToCharValue(keypadBits);
-                // debug_printf("Char: %c\r\n", tempChar);
 
-                if (tempChar == '0' || tempChar == '*' || tempChar == '#') { //CHECKS 1 char commands
+                if (tempChar == '0' || tempChar == '*' || tempChar == '#' || tempChar == '1') { //CHECKS 1 char commands
 
+                    if (currentChar != 0) {
+                        mnemoicStateMachine(currentChar);
+                    }
                     mnemoicStateMachine(tempChar);
                     currentChar = 0;
-                } else if (tempChar == 0 || tempChar == '1') {
-                    //DO NOTHING
-                    
                 } else if (currentChar == 0) { // if First character pressed
 
                     currentChar = tempChar;
-                } else if (currentChar == tempChar) { //If same as previous character
+                } else if (inRange(currentChar, tempChar)) { //If same as previous character *******
 
                     currentChar = incrementCharacter(currentChar);
                 } else { // If different character from last pressed
 
-                    // debug_printf("here\r\n");
                     mnemoicStateMachine(currentChar);
                     currentChar = tempChar;
                 }
@@ -405,6 +419,7 @@ void s4532390_CAG_Keypad_Mnemonic_Task() {
                 previousKeyPressTime = HAL_GetTick();
                 
             }
+
             previousBits = keypadBits;
             
         }

@@ -28,6 +28,7 @@ void s4532390_TaskJoystickZ(void);
 #include "queue.h"
 #include "semphr.h"
 #include "s4532390_os_joystick.h"
+#include "s4532390_hal_joystick.h"
 
 /* Private define ------------------------------------------------------------*/
 #define DEBOUNCE_TICKS 500 //ms waited for debouncing
@@ -42,6 +43,11 @@ unsigned char buttonToggle;
 TaskHandle_t joystickHandle;
 
 
+
+QueueHandle_t s4532390_JoystickQueue;	/* Queue used */
+
+
+
 /**
 *@brief Initialises the joystick task
 *@param  None
@@ -51,7 +57,8 @@ void s4532390_os_joystick_init(void) {
  
     /* Create Semaphore */
     ZSemaphore = xSemaphoreCreateBinary();
-    xTaskCreate( (void *) &s4532390_TaskJoystickZ, (const signed char *) "JOYS", JOYSTICKTASK_STACK_SIZE, NULL, JOYSTICKTASK_PRIORITY, &joystickHandle);
+    s4532390_JoystickQueue = xQueueCreate(1, sizeof(JoystickMessage));
+    xTaskCreate( (void *) &s4532390_TaskJoystick, (const signed char *) "JOYS", JOYSTICKTASK_STACK_SIZE, NULL, JOYSTICKTASK_PRIORITY, &joystickHandle);
 }
 
 /**
@@ -61,7 +68,7 @@ void s4532390_os_joystick_init(void) {
 */
 void s4532390_os_joystick_deinit(void) {
     vSemaphoreDelete(ZSemaphore);
-    vTaskDelete(NULL);
+    vTaskDelete(joystickHandle);
 }
 
 /**
@@ -83,15 +90,33 @@ int debounceJoystickZ(void) {
 
 }
 
+// void s4532390_TaskJoystickXY(void) {
+
+//         JoystickMessage message;    
+
+//     for (;;) {
+        
+//         message.joystick_x = S4532390_HAL_X_READ();
+//         message.joystick_y = S4532390_HAL_Y_READ();
+//         xQueueSendToFront(s4532390_JoystickQueue, (void *) &message, (portTickType) 10);
+//         vTaskDelay(20);
+//     }
+// }
+
 /**
   * @brief  Task for toggling variable using joystick z semaphore
   * @param  None
   * @retval None
   */
-void s4532390_TaskJoystickZ(void) {
+void s4532390_TaskJoystick(void) {
 
+    JoystickMessage message;  
 
-	  for (;;) {
+	for (;;) {
+
+        message.joystick_x = S4532390_HAL_X_READ();
+        message.joystick_y = S4532390_HAL_Y_READ();
+        xQueueSendToFront(s4532390_JoystickQueue, (void *) &message, (portTickType) 10);
 
         if (ZSemaphore != NULL) {	/* Check if semaphore exists */
 
@@ -106,6 +131,6 @@ void s4532390_TaskJoystickZ(void) {
             } 
         }
 
-		    vTaskDelay(10);
-	  }
+	vTaskDelay(20);
+	}
 }
