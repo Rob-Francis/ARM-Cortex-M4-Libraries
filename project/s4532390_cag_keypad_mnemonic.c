@@ -168,6 +168,10 @@ char convert_to_char_value(EventBits_t bits) {
             return 'T';
         case MNE_W:
             return 'W';
+        case MNE_HASH:
+            return '#';
+        case MNE_ASTERIX:
+            return '*';
         default:
             return 0;        
     }

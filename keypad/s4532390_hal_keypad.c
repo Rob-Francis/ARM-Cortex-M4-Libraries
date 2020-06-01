@@ -198,8 +198,6 @@ void handle_rowscan() {
     //Scans row pins
     int tempRow = keypad_readrow();
 
-    // debug_printf("Status: %d\r\n", KeypadStatus);
-
     //Leaves if nothing pressed
     if (tempRow == ROW_EMPTY_STATE) {
         ++statusCount;
@@ -218,8 +216,6 @@ void handle_rowscan() {
     //Prints characters 2 at a time
     if (KeypadToggle) {
 
-        // debug_printf("%X%X\r\n", KeypadValue, temp);
-        // debug_flush();
         KeypadToggle = 0;
     } else {
 

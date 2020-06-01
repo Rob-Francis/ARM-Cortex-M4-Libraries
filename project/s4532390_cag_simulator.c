@@ -321,7 +321,7 @@ void handle_message(caMessage_t message) {
 void handle_event_bits() {
 
     //Waits for an event and handles it
-    switch (xEventGroupWaitBits(s4532390_cagEventGroup, 0xFF, pdTRUE, pdFALSE, 10)) {
+    switch (xEventGroupWaitBits(s4532390_cagEventGroup, 0xFF, pdTRUE, pdFALSE, 20)) {
             case (CLEAR_GRID_BIT):
                 clear_grid();
             break;
@@ -366,7 +366,8 @@ void s4532390_cag_queue_task() {
         handle_event_bits();
 
         //Waits for a message from the queue and then handles it
-        if (xQueueReceive(s4532390_cagSimulatorQueue, &message, 10) == pdTRUE) {
+        if (xQueueReceive(s4532390_cagSimulatorQueue, &message, 20) == pdTRUE) {
+            
             
             handle_message(message);
         }

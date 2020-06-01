@@ -34,7 +34,7 @@ void s4532390_cag_display_task();
 #define CAG_BOARD_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 8 )
 #define SCREEN_CLEAR()  debug_printf("\e[2J")
 #define SCREEN_HOME()  debug_printf("\e[H")
-#define DISPLAY_REFRESH_TIME 100
+#define DISPLAY_REFRESH_TIME 200
 
 //EXTERNAL VARIABLES
 unsigned char s4532390_grid[GRID_WIDTH][GRID_HEIGHT]; // Grid of cells
@@ -61,7 +61,7 @@ void s4532390_cag_display_task() {
     for (;;) {
 
             portENTER_CRITICAL();
-            // SCREEN_CLEAR();
+            
 		    SCREEN_HOME();
             portEXIT_CRITICAL();
             //Goes through each cell, prints black if dead, alive colour otherwise
@@ -71,20 +71,18 @@ void s4532390_cag_display_task() {
                     
                     if (s4532390_grid[i][j] == 0) {
                         portENTER_CRITICAL();
-                        debug_printf("%s %s ", CELL_BLACK, CELL_BLACK);
+                        debug_printf("%s %s ", CELL_BLACK, CELL_BLACK); //Prints dead cells
                         portEXIT_CRITICAL();
                     } else {
                         portENTER_CRITICAL();
-                        debug_printf("%s %s ", s4532390_cellColour, s4532390_cellColour);
+                        debug_printf("%s %s ", s4532390_cellColour, s4532390_cellColour); //Alive cells
                         portEXIT_CRITICAL();
                     }
                     
                 }
 
-                debug_printf("\n\r");
+                debug_printf("\n\r"); //Next line
             }
-
-        debug_printf("\n\r");
 
         vTaskDelay(DISPLAY_REFRESH_TIME);
     }
