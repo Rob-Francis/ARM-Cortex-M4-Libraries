@@ -14,7 +14,8 @@ csse3010_stage4.pdf
 *********************
 void s4532390_os_joystick_init(void);
 void s4532390_os_joystick_deinit(void); 
-void s4532390_TaskJoystickZ(void);
+void s4532390_task_joystick(void);
+int s4532390_debounce_joystick_z(void);
 *********************
 *********************
 **/
@@ -26,12 +27,12 @@ void s4532390_os_joystick_init(void);
 
 void s4532390_os_joystick_deinit(void); 
 
-void s4532390_TaskJoystick(void);
+void s4532390_task_joystick(void);
 
-int s4532390_debounceJoystickZ(void);
+int s4532390_debounce_joystick_z(void);
 
-extern QueueHandle_t s4532390_JoystickQueue;
-extern SemaphoreHandle_t ZSemaphore;
+extern QueueHandle_t s4532390_joystickQueue;
+extern SemaphoreHandle_t s4532390_zSemaphore;
 
 typedef struct JoystickMessages {
     int joystick_x;

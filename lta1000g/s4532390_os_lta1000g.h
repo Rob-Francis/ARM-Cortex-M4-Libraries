@@ -24,7 +24,7 @@ void s4532390_os_lta1000g_deinit(void);
 
 
 /**GLOBALS**/
-extern unsigned short lightbarValue; // Stores current value written into lightbar
+extern unsigned short s4532390_lightbarValue; // Stores current value written into lightbar
 
 void s4532390_Tasklta1000g(void);
 

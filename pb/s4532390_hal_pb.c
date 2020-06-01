@@ -31,7 +31,7 @@
 
 //GLOBAL VARIABLES
 int direction = 0; //Controls direction of bar - 0 default, other reverse
-unsigned short lightBarValue = LTA1000G_START; //Value of the lightbar
+unsigned short s4532390_lightbarValue = LTA1000G_START; //Value of the lightbar
 
 //Initialises the hardware for onboard pushbutton
 void s4532390_hal_pb_on_init() {
@@ -85,31 +85,31 @@ void s4532390_hal_pb_iss_init() {
 void s4532390_hal_pb_iss_isr() {
 	
 	//Writing the bar value out
-	s4532390_hal_lta1000g_write(lightBarValue);
-	debug_printf("Lighbar Value: %x\r\n", lightBarValue);
+	s4532390_hal_lta1000g_write(s4532390_lightbarValue);
+	debug_printf("Lighbar Value: %x\r\n", s4532390_lightbarValue);
 
 	//Checks for the edges/intermediate case
-	if ((lightBarValue >= LTA1000G_START && direction) || (lightBarValue <= LTA1000G_END && !direction)) {
+	if ((s4532390_lightbarValue >= LTA1000G_START && direction) || (s4532390_lightbarValue <= LTA1000G_END && !direction)) {
 
-          lightBarValue = LTA1000G_INTERMEDIATE;
-      } else if (lightBarValue == LTA1000G_INTERMEDIATE) {
+          s4532390_lightbarValue = LTA1000G_INTERMEDIATE;
+      } else if (s4532390_lightbarValue == LTA1000G_INTERMEDIATE) {
 
 		  //Ensures correct direction after the intermediate case
           if (direction) {
 
-            lightBarValue = LTA1000G_END;
+            s4532390_lightbarValue = LTA1000G_END;
            } else {
 
-			lightBarValue = LTA1000G_START;
+			s4532390_lightbarValue = LTA1000G_START;
            }
           
 	  //Bit shifts for normal movement
       } else if (direction) {
 
-          lightBarValue = lightBarValue << 1;
+          s4532390_lightbarValue = s4532390_lightbarValue << 1;
       } else {
 
-          lightBarValue = lightBarValue >> 1;
+          s4532390_lightbarValue = s4532390_lightbarValue >> 1;
       }
 }
 

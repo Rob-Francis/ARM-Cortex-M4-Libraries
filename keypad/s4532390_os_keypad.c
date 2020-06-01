@@ -1,3 +1,25 @@
+/**
+*********************
+*********************
+*@file mylib/keypad/s4532390_os_keypad.c
+*@author Robert Francis - 45323906
+*@date 1/06/2020
+*@brief Keypad OS Library
+*REFERENCE:
+csse3010_project.pdf 
+*********************
+*********************
+*EXTERNAL FUNCTIONs
+*********************
+*********************
+*void s4532390_os_keyad_init()
+*void s4532390_keypad_task()
+*void s4532390_keypad_task();
+*********************
+*********************
+**/
+
+
 #include "s4532390_hal_keypad.h"
 #include "board.h"
 #include "FreeRTOS.h"
@@ -9,24 +31,37 @@
 
 #define KEYPAD_PRIORITY ( tskIDLE_PRIORITY + 6 )
 #define KEYPAD_TASK_STACK_SIZE ( configMINIMAL_STACK_SIZE * 5 )
+#define KEYPAD_TASK_DELAY 10
 
 EventGroupHandle_t s4532390_keypadEventGroup;
 
 int KeypadStatus;
 
-void s4532390_OS_Keyad_Init() {
+/**
+*@brief Initialises the keypad task
+*@param  None
+*@retval None
+*/
+void s4532390_os_keyad_init() {
 
-    xTaskCreate( (void *) &s4532390_Keypad_Task, (const signed char *) "KEYPAD", KEYPAD_TASK_STACK_SIZE, NULL, KEYPAD_PRIORITY, NULL );
-
+    //Creates event group and task
     s4532390_keypadEventGroup = xEventGroupCreate();
+    xTaskCreate( (void *) &s4532390_keypad_task, (const signed char *) "KEYPAD", KEYPAD_TASK_STACK_SIZE, NULL, KEYPAD_PRIORITY, NULL );
 }
 
-void s4532390_Keypad_Task() {
+/**
+*@brief The keypad task
+*@param  None
+*@retval None
+*/
+void s4532390_keypad_task() {
 
     for (;;) {
 
+        //Runs keypad state machine
         s4532390_hal_keypad_fsmprocessing();
 
+        //Sends to event group if keypad is pressed
         if (KeypadStatus) {
 
             xEventGroupSetBits(s4532390_keypadEventGroup, 1 << s4532390_hal_keypad_read_key());
@@ -36,9 +71,7 @@ void s4532390_Keypad_Task() {
             BRD_LEDGreenOff();
         }
 
-        
-
-        vTaskDelay(10);
+        vTaskDelay(KEYPAD_TASK_DELAY);
 
     }
 }

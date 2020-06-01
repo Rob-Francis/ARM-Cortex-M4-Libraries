@@ -14,7 +14,8 @@ csse3010_stage4.pdf
 *********************
 void s4532390_os_joystick_init(void);
 void s4532390_os_joystick_deinit(void); 
-void s4532390_TaskJoystickZ(void);
+void s4532390_task_joystick(void);
+int s4532390_debounce_joystick_z(void);
 *********************
 *********************
 **/
@@ -34,18 +35,13 @@ void s4532390_TaskJoystickZ(void);
 #define DEBOUNCE_TICKS 500 //ms waited for debouncing
 #define JOYSTICKTASK_STACK_SIZE	( configMINIMAL_STACK_SIZE * 4 ) //Size of stack for task
 #define JOYSTICKTASK_PRIORITY					( tskIDLE_PRIORITY + 1 ) //Priority of task
-
+#define JOYSTICK_DELAY 100
 
 /* Private variables ---------------------------------------------------------*/
-
 int previousTickTime; //Stores time when last pressed
-TaskHandle_t joystickHandle;
-
-
-
-QueueHandle_t s4532390_JoystickQueue;	/* Queue used */
-
-
+TaskHandle_t joystickHandle; //Handle to the joystick task
+QueueHandle_t s4532390_joystickQueue;	/* Queue used */
+SemaphoreHandle_t s4532390_zSemaphore;
 
 /**
 *@brief Initialises the joystick task
@@ -55,9 +51,13 @@ QueueHandle_t s4532390_JoystickQueue;	/* Queue used */
 void s4532390_os_joystick_init(void) {
  
     /* Create Semaphore */
-    ZSemaphore = xSemaphoreCreateBinary();
-    s4532390_JoystickQueue = xQueueCreate(1, sizeof(JoystickMessage));
-    xTaskCreate( (void *) &s4532390_TaskJoystick, (const signed char *) "JOYS", JOYSTICKTASK_STACK_SIZE, NULL, JOYSTICKTASK_PRIORITY, &joystickHandle);
+    s4532390_zSemaphore = xSemaphoreCreateBinary();
+
+    //Creates queue of size 1
+    s4532390_joystickQueue = xQueueCreate(1, sizeof(JoystickMessage));
+
+    //Initialises task
+    xTaskCreate( (void *) &s4532390_task_joystick, (const signed char *) "JOYS", JOYSTICKTASK_STACK_SIZE, NULL, JOYSTICKTASK_PRIORITY, &joystickHandle);
 }
 
 /**
@@ -66,16 +66,18 @@ void s4532390_os_joystick_init(void) {
 *@retval None
 */
 void s4532390_os_joystick_deinit(void) {
-    vSemaphoreDelete(ZSemaphore);
+
+    //Deletes semaphore and task
+    vSemaphoreDelete(s4532390_zSemaphore);
     vTaskDelete(joystickHandle);
 }
 
 /**
-*@brief Internal function for debouncing lightbar
+*@brief Function for debouncing lightbar
 *@param  None
 *@retval Returns 1 if enough time has passed 0 otherwise
 */
-int s4532390_debounceJoystickZ(void) {
+int s4532390_debounce_joystick_z(void) {
 
     int tick = xTaskGetTickCountFromISR(); // Gets current tick count
     if (tick > previousTickTime + DEBOUNCE_TICKS) { // Makes sure 500ms has passed
@@ -88,35 +90,25 @@ int s4532390_debounceJoystickZ(void) {
 
 }
 
-// void s4532390_TaskJoystickXY(void) {
-
-//         JoystickMessage message;    
-
-//     for (;;) {
-        
-//         message.joystick_x = S4532390_HAL_X_READ();
-//         message.joystick_y = S4532390_HAL_Y_READ();
-//         xQueueSendToFront(s4532390_JoystickQueue, (void *) &message, (portTickType) 10);
-//         vTaskDelay(20);
-//     }
-// }
 
 /**
   * @brief  Task for toggling variable using joystick z semaphore
   * @param  None
   * @retval None
   */
-void s4532390_TaskJoystick(void) {
+void s4532390_task_joystick(void) {
 
     JoystickMessage message;  
 
 	for (;;) {
 
+        //Sets x and y values for message
         message.joystick_x = S4532390_HAL_X_READ();
         message.joystick_y = S4532390_HAL_Y_READ();
 
-        xQueueSendToFront(s4532390_JoystickQueue, (void *) &message, (portTickType) 10);
+        //Sends to queue
+        xQueueSendToFront(s4532390_joystickQueue, (void *) &message, (portTickType) 10);
 
-	    vTaskDelay(100);
+	    vTaskDelay(JOYSTICK_DELAY);
 	}
 }

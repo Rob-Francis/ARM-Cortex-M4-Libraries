@@ -21,7 +21,7 @@
 
 //GLOBAL VARIABLES
 extern int direction; //Controls direction lightbar is moving
-extern unsigned short lightBarValue; //Controls what is wiritten to the lightbar
+extern unsigned short s4532390_lightbarValue; //Controls what is wiritten to the lightbar
 
 void s4532390_hal_pb_on_init();
 

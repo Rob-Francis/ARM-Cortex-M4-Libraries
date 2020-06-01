@@ -36,7 +36,7 @@ void s4532390_os_lta1000g_deinit(void);
 #define LTA1000GTASK_STACK_SIZE	( configMINIMAL_STACK_SIZE * 2 ) //Task stack size
 
 /* Private variables ---------------------------------------------------------*/
-unsigned short lightbarValue; // Stores current value written into lightbar
+unsigned short s4532390_lightbarValue; // Stores current value written into lightbar
 TaskHandle_t lta1000gHandle;
 
 
@@ -62,14 +62,14 @@ void s4532390_os_lta1000g_deinit(void) {
 }
 
 /**
-  * @brief  Lightbar task - writes the current lightbarvalue into the bar
+  * @brief  Lightbar task - writes the current s4532390_lightbarValue into the bar
   * @param  None
   * @retval None
   */
 void s4532390_Tasklta1000g(void) {
 
   	for (;;) {        
-	  	  s4532390_hal_lta1000g_write(lightbarValue);
+	  	  s4532390_hal_lta1000g_write(s4532390_lightbarValue);
         vTaskDelay(100); // Delay of 100ms
 	  }
 }
